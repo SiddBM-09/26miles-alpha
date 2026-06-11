@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: "Inter", sans-serif;
+    --font-geist-mono: "GeistMono", "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    @apply bg-canvas text-text-primary font-sans text-base;
+    background-color: #0a0b0d;
+    color: #e8eaf0;
+  }
+
+  /* Tabular numerals everywhere inside mono font spans */
+  .font-mono,
+  [data-tabular] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111318;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a3042;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3b4256;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: #e8eaf0;
+  }
+}
+
+@layer utilities {
+  /* Metric number — tabular mono, primary color */
+  .metric-value {
+    @apply font-mono text-text-primary font-medium tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Subtle separator line */
+  .divider {
+    @apply border-t border-border;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-surface rounded-lg border border-border shadow-card;
+  }
+
+  /* Positive / negative color utilities */
+  .positive { @apply text-profit; }
+  .negative { @apply text-loss; }
+  .neutral  { @apply text-text-secondary; }
+}
