@@ -59,7 +59,7 @@ const LIFECYCLE_STYLES: Record<LifecycleState, string> = {
   paper:      "bg-accent/8 text-accent border-accent/25",
   live:       "bg-profit/8 text-profit border-profit/25",
   decaying:   "bg-warn/8 text-warn border-warn/25",
-  retired:    "bg-muted/40 text-text-tertiary border-border/60",
+  retired:    "bg-muted/40 text-text-tertiary border-border",
 };
 
 const LIFECYCLE_ICONS: Record<LifecycleState, React.ElementType> = {

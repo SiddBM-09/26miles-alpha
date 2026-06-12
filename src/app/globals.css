@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens — CSS variables ────────────────────────────────────────── */
+
+/* Dark theme (default / :root) */
+:root {
+  --canvas:          10 11 13;       /* #0A0B0D */
+  --surface:         20 22 26;       /* #14161A */
+  --elevated:        28 31 38;       /* #1C1F26 */
+  --border:          rgba(255,255,255,0.07);
+  --muted:           37 40 48;       /* #252830 */
+  --accent:          170 255 62;     /* #AAFF3E */
+  --profit:          34 212 122;     /* #22D47A */
+  --loss:            255 64 64;      /* #FF4040 */
+  --warn:            245 166 35;     /* #F5A623 */
+  --text-primary:    230 232 235;    /* #E6E8EB */
+  --text-secondary:  138 144 153;    /* #8A9099 */
+  --text-tertiary:   77 85 98;       /* #4D5562 */
+}
+
+/* Light theme — applied via .light class on <html> */
+.light {
+  --canvas:          245 246 248;    /* #F5F6F8 */
+  --surface:         255 255 255;    /* #FFFFFF */
+  --elevated:        238 240 245;    /* #EEF0F5 */
+  --border:          rgba(0,0,0,0.08);
+  --muted:           226 229 238;    /* #E2E5EE */
+  --accent:          92 184 0;       /* #5CB800 */
+  --profit:          11 140 74;      /* #0B8C4A */
+  --loss:            204 41 41;      /* #CC2929 */
+  --warn:            168 96 0;       /* #A86000 */
+  --text-primary:    13 17 23;       /* #0D1117 */
+  --text-secondary:  71 85 105;      /* #475569 */
+  --text-tertiary:   148 163 184;    /* #94A3B8 */
+}
+
 /* ── Fonts ────────────────────────────────────────────────────────────────── */
 
 @layer base {
@@ -17,7 +51,6 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Tabular figures by default — numerals align in tables/charts */
     font-feature-settings: "tnum" 0, "liga" 0, "cv02", "cv03", "cv04";
   }
 
@@ -38,58 +71,55 @@
     -webkit-font-smoothing: auto;
   }
 
-  /* Scrollbar — thin, subtle, lime on hover */
+  /* Scrollbar — thin, subtle, accent on hover */
   ::-webkit-scrollbar             { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track       { background: #0A0B0D; }
-  ::-webkit-scrollbar-thumb       { background: rgba(255,255,255,0.10); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(170,255,62,0.35); }
+  ::-webkit-scrollbar-track       { background: rgb(var(--canvas)); }
+  ::-webkit-scrollbar-thumb       { background: rgba(128,128,128,0.18); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--accent) / 0.35); }
 
-  /* Selection — lime tint */
+  /* Selection — accent tint */
   ::selection {
-    background: rgba(170, 255, 62, 0.15);
-    color: #E6E8EB;
+    background: rgb(var(--accent) / 0.15);
+    color: rgb(var(--text-primary));
   }
 
   /* ── Focus-visible: consistent accent outline for keyboard nav ── */
   :focus-visible {
-    outline: 1px solid rgba(170, 255, 62, 0.55);
+    outline: 1px solid rgb(var(--accent) / 0.55);
     outline-offset: 2px;
     border-radius: 2px;
   }
-  /* Suppress browser focus ring on mouse/touch; keep for keyboard only */
   :focus:not(:focus-visible) {
     outline: none;
   }
 
-  /* Headings — tight tracking, no extra margin */
+  /* Headings */
   h1, h2, h3, h4 {
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: #E6E8EB;
+    color: rgb(var(--text-primary));
   }
 
-  /* Links inside body text — no default underline */
   a { text-decoration: none; }
 }
 
-/* ── Component layer — reusable classes ──────────────────────────────────── */
+/* ── Component layer ─────────────────────────────────────────────────────── */
 
 @layer components {
 
-  /* ── Card — hairline border, no shadow ── */
+  /* ── Card ── */
   .card {
     @apply bg-surface rounded-lg border border-border;
   }
 
-  /* ── Micro-label — terminal section headers ── */
-  /* Usage: <p className="label-caps">Section title</p> */
+  /* ── Micro-labels ── */
   .label-caps {
     font-family: var(--font-mono);
-    font-size: 0.625rem;          /* 10px */
+    font-size: 0.625rem;
     line-height: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #4D5562;               /* text-tertiary */
+    color: rgb(var(--text-tertiary));
     font-weight: 500;
   }
 
@@ -99,7 +129,7 @@
     line-height: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #AAFF3E;               /* accent */
+    color: rgb(var(--accent));
     font-weight: 500;
   }
 
@@ -109,23 +139,23 @@
     font-size: 0.625rem;
     text-transform: uppercase;
     letter-spacing: 0.10em;
-    color: #4D5562;
+    color: rgb(var(--text-tertiary));
     font-weight: 500;
     white-space: nowrap;
   }
 
-  /* ── Primary button — accent bg, dark text ── */
-  /* IMPORTANT: text must be dark (text-canvas) on the lime accent */
+  /* ── Primary button — accent bg, ALWAYS near-black text ── */
+  /* Use text-on-accent (not text-canvas) so light-mode canvas doesn't break contrast */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded px-4 py-2 text-sm font-semibold
-           bg-accent text-canvas hover:bg-accent/90 transition-colors whitespace-nowrap;
+           bg-accent text-on-accent hover:bg-accent/90 transition-colors whitespace-nowrap;
   }
 
-  /* ── Ghost button — hairline border ── */
+  /* ── Ghost button ── */
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded px-4 py-2 text-sm font-medium
            border border-border text-text-secondary hover:text-text-primary
-           hover:border-[rgba(170,255,62,0.25)] transition-colors whitespace-nowrap bg-transparent;
+           hover:border-accent/25 transition-colors whitespace-nowrap bg-transparent;
   }
 
   /* ── Divider ── */

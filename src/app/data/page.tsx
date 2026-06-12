@@ -15,6 +15,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { MetricLabel } from "@/components/ui/MetricLabel";
 import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
+import { useChartColors } from "@/components/ThemeProvider";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -26,10 +27,12 @@ type DataAsset   = "Equities" | "Derivatives" | "Macro" | "Corporate Events";
 
 interface ColDef { name: string; type: string; description: string; }
 
+type ColorRole = "accent" | "profit" | "warn";
+
 type ChartSpec =
-  | { kind: "line";  data: { x: string; v: number }[];           yLabel: string; color: string }
-  | { kind: "area";  data: { x: string; v: number }[];           yLabel: string; color: string }
-  | { kind: "bar";   data: { x: string; v: number; v2?: number }[]; yLabel: string; color: string; color2?: string; negativeColor?: string };
+  | { kind: "line";  data: { x: string; v: number }[];               yLabel: string; colorRole: ColorRole }
+  | { kind: "area";  data: { x: string; v: number }[];               yLabel: string; colorRole: ColorRole }
+  | { kind: "bar";   data: { x: string; v: number; v2?: number }[]; yLabel: string; colorRole: ColorRole; negative?: boolean };
 
 interface Dataset {
   id: string;
@@ -100,7 +103,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "Close (₹)",
-      color: "#AAFF3E",
+      colorRole: "accent" as ColorRole,
       data: [
         { x: "Jan", v: 2614 }, { x: "Feb", v: 2748 }, { x: "Mar", v: 2832 },
         { x: "Apr", v: 2801 }, { x: "May", v: 2921 }, { x: "Jun", v: 2968 },
@@ -153,7 +156,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "OI (000s)",
-      color: "#AAFF3E",
+      colorRole: "accent" as ColorRole,
       data: [
         { x: "21600 CE", v: 182 }, { x: "21800 CE", v: 1422 }, { x: "22000 CE", v: 1248 },
         { x: "22200 CE", v: 892 }, { x: "22400 CE", v: 641 },  { x: "22600 CE", v: 318 },
@@ -203,7 +206,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "PAT (₹ Cr)",
-      color: "#22D47A",
+      colorRole: "profit" as ColorRole,
       data: [
         { x: "Q3'22", v: 9_926 }, { x: "Q4'22", v: 10_846 }, { x: "Q1'23", v: 11_074 },
         { x: "Q2'23", v: 11_342 }, { x: "Q3'23", v: 11_058 }, { x: "Q4'23", v: 11_392 },
@@ -254,7 +257,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "area",
       yLabel: "Price (₹)",
-      color: "#AAFF3E",
+      colorRole: "accent" as ColorRole,
       data: [
         { x: "09:15", v: 1604.80 }, { x: "09:30", v: 1607.20 }, { x: "09:45", v: 1611.40 },
         { x: "10:00", v: 1608.90 }, { x: "10:15", v: 1613.50 }, { x: "10:30", v: 1610.20 },
@@ -306,7 +309,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "Weight %",
-      color: "#F5A623",
+      colorRole: "warn" as ColorRole,
       data: [
         { x: "Jan'23", v: 9.12 }, { x: "Apr'23", v: 9.34 }, { x: "Jul'23", v: 9.48 },
         { x: "Oct'23", v: 9.67 }, { x: "Jan'24", v: 9.71 }, { x: "Apr'24", v: 9.82 },
@@ -353,7 +356,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "Div / share (₹)",
-      color: "#22D47A",
+      colorRole: "profit" as ColorRole,
       data: [
         { x: "FY19", v: 6 }, { x: "FY20", v: 6 }, { x: "FY21", v: 0 },
         { x: "FY22", v: 7 }, { x: "FY23", v: 8 }, { x: "FY24", v: 10 },
@@ -399,8 +402,8 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "Net flow (₹ Cr)",
-      color: "#22D47A",
-      negativeColor: "#FF4040",
+      colorRole: "profit" as ColorRole,
+      negative: true,
       data: [
         { x: "Jan", v: 4_214 }, { x: "Feb", v: -2_841 }, { x: "Mar", v: 1_928 },
         { x: "Apr", v: -4_102 }, { x: "May", v: 3_618 }, { x: "Jun", v: 2_241 },
@@ -450,7 +453,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "% / Rate",
-      color: "#F5A623",
+      colorRole: "warn" as ColorRole,
       data: [
         { x: "Jun'23", v: 4.81 }, { x: "Jul'23", v: 7.44 }, { x: "Aug'23", v: 6.83 },
         { x: "Sep'23", v: 5.02 }, { x: "Oct'23", v: 4.87 }, { x: "Nov'23", v: 5.55 },
@@ -516,15 +519,31 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 // Dataset chart
 // ─────────────────────────────────────────────────────────────────────────────
 
-const chartTooltipStyle = {
-  contentStyle: { background: "#1C1F26", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 4, fontSize: 10, fontFamily: "var(--font-mono)" },
-  labelStyle:   { color: "#4D5562" },
-  itemStyle:    { color: "#E6E8EB" },
-};
-
 function DataChart({ spec }: { spec: ChartSpec }) {
-  const TICK = { fill: "#4D5562", fontSize: 10, fontFamily: "var(--font-mono)" };
-  const GRID = "rgba(255,255,255,0.045)";
+  const c = useChartColors();
+
+  const COLOR_MAP: Record<ColorRole, string> = {
+    accent: c.accent,
+    profit: c.profit,
+    warn:   c.warn,
+  };
+  const color = COLOR_MAP[spec.colorRole];
+
+  const TICK = c.tick;
+  const GRID = c.grid;
+  const labelStyle = { fontSize: 9, fill: c.tick.fill, fontFamily: "var(--font-mono)" };
+
+  const tooltipProps = {
+    contentStyle: {
+      background: c.tooltipBg,
+      border: `1px solid ${c.tooltipBorder}`,
+      borderRadius: 4,
+      fontSize: 10,
+      fontFamily: "var(--font-mono)",
+    },
+    labelStyle: { color: c.tooltipLabel },
+    itemStyle:  { color: c.tooltipItem },
+  };
 
   if (spec.kind === "line") {
     return (
@@ -533,9 +552,9 @@ function DataChart({ spec }: { spec: ChartSpec }) {
           <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
           <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
           <YAxis tick={TICK} axisLine={false} tickLine={false} width={48}
-            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
-          <RTooltip {...chartTooltipStyle} />
-          <Line dataKey="v" stroke={spec.color} strokeWidth={1.5} dot={false} />
+            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: labelStyle }} />
+          <RTooltip {...tooltipProps} />
+          <Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -546,17 +565,17 @@ function DataChart({ spec }: { spec: ChartSpec }) {
         <AreaChart data={spec.data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor={spec.color} stopOpacity={0.12} />
-              <stop offset="95%" stopColor={spec.color} stopOpacity={0}    />
+              <stop offset="5%"  stopColor={color} stopOpacity={0.12} />
+              <stop offset="95%" stopColor={color} stopOpacity={0}    />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
           <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
           <YAxis tick={TICK} axisLine={false} tickLine={false} width={56}
             domain={["auto", "auto"]}
-            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 14, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
-          <RTooltip {...chartTooltipStyle} />
-          <Area dataKey="v" stroke={spec.color} strokeWidth={1.5} fill="url(#areaGrad)" dot={false} />
+            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 14, style: labelStyle }} />
+          <RTooltip {...tooltipProps} />
+          <Area dataKey="v" stroke={color} strokeWidth={1.5} fill="url(#areaGrad)" dot={false} />
         </AreaChart>
       </ResponsiveContainer>
     );
@@ -568,13 +587,13 @@ function DataChart({ spec }: { spec: ChartSpec }) {
         <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
         <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
         <YAxis tick={TICK} axisLine={false} tickLine={false} width={48}
-          label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
-        <RTooltip {...chartTooltipStyle} />
+          label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: labelStyle }} />
+        <RTooltip {...tooltipProps} />
         <Bar dataKey="v" radius={[2, 2, 0, 0]}>
           {spec.data.map((d, i) => (
             <Cell
               key={i}
-              fill={spec.negativeColor && d.v < 0 ? spec.negativeColor : spec.color}
+              fill={('negative' in spec) && spec.negative && d.v < 0 ? c.loss : color}
               opacity={0.85}
             />
           ))}
@@ -777,7 +796,7 @@ function DatasetDetail({
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={onSandbox}
-          className="inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors"
+          className="inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-on-accent px-4 py-2.5 text-sm font-semibold transition-colors"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
@@ -848,7 +867,7 @@ export default function DataPage() {
         </div>
         <button
           onClick={openSandbox}
-          className="flex-shrink-0 inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-on-accent px-4 py-2.5 text-sm font-semibold transition-colors"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
@@ -898,7 +917,7 @@ export default function DataPage() {
               </span>
               {showFilters ? "Hide filters" : "Filters"}
               {(assetFilter !== "All" || tierFilter !== "All") && (
-                <span className="ml-1 h-4 w-4 rounded-full bg-accent text-canvas text-2xs flex items-center justify-center">
+                <span className="ml-1 h-4 w-4 rounded-full bg-accent text-on-accent text-2xs flex items-center justify-center">
                   {(assetFilter !== "All" ? 1 : 0) + (tierFilter !== "All" ? 1 : 0)}
                 </span>
               )}

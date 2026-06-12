@@ -3,12 +3,12 @@
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
-  type TooltipProps,
 } from "recharts";
+import { useChartColors } from "@/components/ThemeProvider";
 
 export interface EarningsChartPoint {
-  monthLabel: string;   // "Jun '25"
-  month:      string;   // "2025-06" — for reference line matching
+  monthLabel: string;
+  month:      string;
   retainer:   number;
   perfFee:    number;
   cumulative: number;
@@ -20,39 +20,39 @@ function fmtINR(n: number): string {
   return `₹${n}`;
 }
 
-const TICK = { fill: "#4D5562", fontSize: 10, fontFamily: "var(--font-mono)" };
-const GRID = "rgba(255,255,255,0.045)";
-
-function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function CustomTooltip({ active, payload, label, c }: any) {
   if (!active || !payload?.length) return null;
 
-  const retainer = payload.find((p) => p.dataKey === "retainer")?.value ?? 0;
-  const perfFee  = payload.find((p) => p.dataKey === "perfFee")?.value  ?? 0;
-  const cumul    = payload.find((p) => p.dataKey === "cumulative")?.value ?? 0;
+  const retainer = payload.find((p: any) => p.dataKey === "retainer")?.value ?? 0;
+  const perfFee  = payload.find((p: any) => p.dataKey === "perfFee")?.value  ?? 0;
+  const cumul    = payload.find((p: any) => p.dataKey === "cumulative")?.value ?? 0;
   const total    = (retainer as number) + (perfFee as number);
 
   return (
-    <div className="rounded border border-border bg-elevated/98 px-3 py-2.5 text-xs space-y-1.5 min-w-[160px]">
-      <p className="font-mono font-medium text-text-primary border-b border-border pb-1.5 tracking-wide">{label}</p>
+    <div
+      className="rounded border px-3 py-2.5 text-xs space-y-1.5 min-w-[160px]"
+      style={{ background: c.tooltipBg, borderColor: c.tooltipBorder }}
+    >
+      <p className="font-mono font-medium border-b pb-1.5 tracking-wide" style={{ color: c.tooltipItem, borderColor: c.tooltipBorder }}>{label}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
-          <span className="text-text-tertiary font-mono">Retainer</span>
-          <span className="font-mono tabular-nums text-text-secondary">{fmtINR(retainer as number)}</span>
+          <span className="font-mono" style={{ color: c.tooltipLabel }}>Retainer</span>
+          <span className="font-mono tabular-nums" style={{ color: c.tooltipItem }}>{fmtINR(retainer as number)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-text-tertiary font-mono">Perf fee</span>
-          <span className={`font-mono tabular-nums ${(perfFee as number) > 0 ? "text-profit" : "text-text-tertiary"}`}>
+          <span className="font-mono" style={{ color: c.tooltipLabel }}>Perf fee</span>
+          <span className="font-mono tabular-nums" style={{ color: (perfFee as number) > 0 ? c.profit : c.tooltipLabel }}>
             {(perfFee as number) > 0 ? fmtINR(perfFee as number) : "Below HWM"}
           </span>
         </div>
-        <div className="flex justify-between gap-4 border-t border-border pt-1">
-          <span className="text-text-secondary font-mono font-medium">Total</span>
-          <span className="font-mono tabular-nums text-text-primary font-medium">{fmtINR(total)}</span>
+        <div className="flex justify-between gap-4 border-t pt-1" style={{ borderColor: c.tooltipBorder }}>
+          <span className="font-mono font-medium" style={{ color: c.tooltipItem }}>Total</span>
+          <span className="font-mono tabular-nums font-medium" style={{ color: c.tooltipItem }}>{fmtINR(total)}</span>
         </div>
       </div>
-      <div className="flex justify-between gap-4 border-t border-border pt-1.5">
-        <span className="text-text-tertiary font-mono">Cumulative</span>
-        <span className="font-mono tabular-nums text-accent">{fmtINR(cumul as number)}</span>
+      <div className="flex justify-between gap-4 border-t pt-1.5" style={{ borderColor: c.tooltipBorder }}>
+        <span className="font-mono" style={{ color: c.tooltipLabel }}>Cumulative</span>
+        <span className="font-mono tabular-nums" style={{ color: c.accent }}>{fmtINR(cumul as number)}</span>
       </div>
     </div>
   );
@@ -61,11 +61,13 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
 interface EarningsChartProps {
   data:            EarningsChartPoint[];
   retainerMonthly: number;
-  hwmMonth:        string;   // "YYYY-MM"
-  hwmLabel:        string;   // e.g. "NAV 143.8 → 148.2"
+  hwmMonth:        string;
+  hwmLabel:        string;
 }
 
-export function EarningsChart({ data, retainerMonthly, hwmMonth, hwmLabel }: EarningsChartProps) {
+export function EarningsChart({ data, retainerMonthly, hwmMonth }: EarningsChartProps) {
+  const c = useChartColors();
+
   const hwmEntry = data.find((d) => d.month === hwmMonth);
   const hwmX     = hwmEntry?.monthLabel;
 
@@ -73,36 +75,37 @@ export function EarningsChart({ data, retainerMonthly, hwmMonth, hwmLabel }: Ear
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 4, right: 48, bottom: 0, left: 8 }} barCategoryGap="32%">
-          <CartesianGrid vertical={false} stroke={GRID} strokeDasharray="0" />
+          <CartesianGrid vertical={false} stroke={c.grid} strokeDasharray="0" />
 
-          <XAxis dataKey="monthLabel" tick={TICK} axisLine={false} tickLine={false} tickMargin={8} />
+          <XAxis dataKey="monthLabel" tick={c.tick} axisLine={false} tickLine={false} tickMargin={8} />
 
-          {/* Left axis — monthly payout */}
           <YAxis
             yAxisId="monthly"
             orientation="left"
             tickFormatter={(v) => `₹${v / 1000}K`}
-            tick={TICK}
+            tick={c.tick}
             axisLine={false} tickLine={false}
             width={44}
           />
 
-          {/* Right axis — cumulative */}
           <YAxis
             yAxisId="cumul"
             orientation="right"
             tickFormatter={(v) => `₹${(v / 100_000).toFixed(1)}L`}
-            tick={TICK}
+            tick={c.tick}
             axisLine={false} tickLine={false}
             width={44}
           />
 
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(170,255,62,0.04)" }} />
+          <Tooltip
+            content={(props) => <CustomTooltip {...props} c={c} />}
+            cursor={{ fill: c.cursorBar }}
+          />
 
           <Legend
             wrapperStyle={{
               fontSize: 10,
-              color: "#4D5562",
+              color: c.tick.fill,
               paddingTop: 12,
               fontFamily: "var(--font-mono)",
             }}
@@ -115,33 +118,33 @@ export function EarningsChart({ data, retainerMonthly, hwmMonth, hwmLabel }: Ear
             }
           />
 
-          {/* Retainer floor reference */}
+          {/* Retainer floor */}
           <ReferenceLine
             yAxisId="monthly"
             y={retainerMonthly}
-            stroke="rgba(255,255,255,0.08)"
+            stroke={c.grid}
             strokeDasharray="4 3"
             label={{
               value: "Retainer floor",
               position: "insideTopLeft",
-              fill: "#4D5562",
+              fill: c.tick.fill,
               fontSize: 9,
               fontFamily: "var(--font-mono)",
               dy: -6,
             }}
           />
 
-          {/* HWM milestone marker — accent-tinted */}
+          {/* HWM milestone marker */}
           {hwmX && (
             <ReferenceLine
               yAxisId="monthly"
               x={hwmX}
-              stroke="rgba(170,255,62,0.50)"
+              stroke={c.hwmMarker}
               strokeDasharray="4 3"
               label={{
                 value: "HWM ↑",
                 position: "insideTopRight",
-                fill: "rgba(170,255,62,0.70)",
+                fill: c.hwmMarkerLabel,
                 fontSize: 9,
                 fontFamily: "var(--font-mono)",
                 dy: -6,
@@ -149,19 +152,17 @@ export function EarningsChart({ data, retainerMonthly, hwmMonth, hwmLabel }: Ear
             />
           )}
 
-          {/* Stacked bars — retainer (muted base) + perf fee (profit) */}
-          <Bar yAxisId="monthly" dataKey="retainer" stackId="pay" fill="#252830"    name="retainer" radius={[0, 0, 0, 0]} />
-          <Bar yAxisId="monthly" dataKey="perfFee"  stackId="pay" fill="#22D47A" fillOpacity={0.9} name="perfFee" radius={[2, 2, 0, 0]} />
+          <Bar yAxisId="monthly" dataKey="retainer" stackId="pay" fill={c.retainerBar}    name="retainer" radius={[0, 0, 0, 0]} />
+          <Bar yAxisId="monthly" dataKey="perfFee"  stackId="pay" fill={c.profit} fillOpacity={0.9} name="perfFee" radius={[2, 2, 0, 0]} />
 
-          {/* Cumulative line — accent, the hero metric */}
           <Line
             yAxisId="cumul"
             dataKey="cumulative"
             name="Cumulative"
-            stroke="#AAFF3E"
+            stroke={c.accent}
             strokeWidth={1.5}
             dot={false}
-            activeDot={{ r: 3, fill: "#AAFF3E", strokeWidth: 0 }}
+            activeDot={{ r: 3, fill: c.accent, strokeWidth: 0 }}
             isAnimationActive={false}
           />
         </ComposedChart>

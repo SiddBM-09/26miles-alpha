@@ -10,6 +10,7 @@ import { PageContainer } from "@/components/AppShell";
 import { MetricLabel } from "@/components/ui/MetricLabel";
 import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
+import { useChartColors } from "@/components/ThemeProvider";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Static data
@@ -96,63 +97,67 @@ const LEVEL_RANGES = [
 // HWM chart sub-components
 // ─────────────────────────────────────────────────────────────────────────────
 
-function HWMTooltip({ active, payload }: any) {
+function HWMTooltip({ active, payload, c }: any) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload as { month: string; nav: number; hwm: number };
   const above = d.nav >= d.hwm - 0.01;
   return (
-    <div className="rounded border border-border bg-elevated px-3 py-2 text-xs font-mono">
-      <p className="text-text-secondary mb-1.5 font-medium">{d.month}</p>
-      <p className="text-profit">NAV  {d.nav.toFixed(1)}</p>
-      <p className="text-warn">HWM  {d.hwm.toFixed(1)}</p>
-      <p className={cn("mt-1.5 pt-1.5 border-t border-border", above ? "text-profit" : "text-loss")}>
+    <div className="rounded border px-3 py-2 text-xs font-mono"
+      style={{ background: c.tooltipBg, borderColor: c.tooltipBorder }}>
+      <p className="mb-1.5 font-medium" style={{ color: c.tooltipLabel }}>{d.month}</p>
+      <p style={{ color: c.profit }}>NAV  {d.nav.toFixed(1)}</p>
+      <p style={{ color: c.warn }}>HWM  {d.hwm.toFixed(1)}</p>
+      <p className="mt-1.5 pt-1.5 border-t" style={{ borderColor: c.tooltipBorder, color: above ? c.profit : c.loss }}>
         {above ? "✓ Perf fee earned" : "✗ Below HWM — no fee"}
       </p>
     </div>
   );
 }
 
-function NavDot(props: any) {
-  const { cx, cy, payload } = props;
+function NavDotInner(props: any) {
+  const { cx, cy, payload, c } = props;
   const below = (payload as { nav: number; hwm: number }).nav < payload.hwm - 0.01;
   return (
     <circle
       cx={cx}
       cy={cy}
       r={4}
-      fill={below ? "#FF4040" : "#22D47A"}
-      stroke="#0A0B0D"
+      fill={below ? c.loss : c.profit}
+      stroke={c.tooltipBg}
       strokeWidth={1.5}
     />
   );
 }
 
 function HWMChart() {
+  const c = useChartColors();
+
+  const NavDot = (props: any) => <NavDotInner {...props} c={c} />;
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={HWM_CHART} margin={{ top: 12, right: 8, left: -24, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.045)" vertical={false} />
+        <CartesianGrid strokeDasharray="0" stroke={c.grid} vertical={false} />
         <XAxis
           dataKey="month"
-          tick={{ fontSize: 10, fill: "#4D5562", fontFamily: "var(--font-mono)" }}
+          tick={c.tick}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
           domain={[98.5, 106.5]}
           tickCount={5}
-          tick={{ fontSize: 10, fill: "#4D5562", fontFamily: "var(--font-mono)" }}
+          tick={c.tick}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => v.toFixed(0)}
         />
-        <ChartTooltip content={<HWMTooltip />} cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }} />
+        <ChartTooltip content={(props: any) => <HWMTooltip {...props} c={c} />} cursor={c.cursor} />
 
-        {/* HWM — step function, warn dashed */}
         <Line
           type="stepAfter"
           dataKey="hwm"
-          stroke="#F5A623"
+          stroke={c.hwmLine}
           strokeWidth={1.5}
           strokeDasharray="5 3"
           dot={false}
@@ -160,14 +165,13 @@ function HWMChart() {
           name="HWM"
         />
 
-        {/* NAV — smooth, colored dots per-point */}
         <Line
           type="monotone"
           dataKey="nav"
-          stroke="#22D47A"
+          stroke={c.profit}
           strokeWidth={1.5}
           dot={<NavDot />}
-          activeDot={{ r: 4, fill: "#22D47A", stroke: "#0A0B0D", strokeWidth: 1.5 }}
+          activeDot={{ r: 4, fill: c.profit, stroke: c.tooltipBg, strokeWidth: 1.5 }}
           name="NAV"
         />
       </LineChart>
@@ -644,7 +648,7 @@ export default function IncomePage() {
             <Link
               href="/submit"
               className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-semibold
-                         bg-accent hover:bg-accent/90 text-canvas transition-colors whitespace-nowrap"
+                         bg-accent hover:bg-accent/90 text-on-accent transition-colors whitespace-nowrap"
             >
               Submit a Strategy
               <ArrowRight className="h-4 w-4" />

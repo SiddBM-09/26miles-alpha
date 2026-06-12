@@ -3,11 +3,11 @@
 import {
   ComposedChart, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceLine, ReferenceArea, ResponsiveContainer,
-  type TooltipProps,
 } from "recharts";
+import { useChartColors } from "@/components/ThemeProvider";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types passed from server
+// Types
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface EquityPoint {
@@ -18,7 +18,7 @@ export interface EquityPoint {
 
 export interface DrawdownPoint {
   date:     string;
-  dd:       number;   // e.g. -7.3  (always ≤ 0)
+  dd:       number;
   inSample: boolean;
 }
 
@@ -38,35 +38,34 @@ function sparseTicks(data: { date: string }[], n = 6): string[] {
   return data.filter((_, i) => i % step === 0).map((d) => d.date);
 }
 
-// Shared axis/grid constants matching the design system
-const TICK  = { fill: "#4D5562", fontSize: 10, fontFamily: "var(--font-mono)" };
-const GRID  = "rgba(255,255,255,0.045)";
-const CURSOR = { stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 };
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Equity curve tooltip
 // ─────────────────────────────────────────────────────────────────────────────
 
-function EquityTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function EquityTooltip({ active, payload, label, c }: any) {
   if (!active || !payload?.length) return null;
-  const is  = payload.find((p) => p.dataKey === "is")?.value;
-  const oos = payload.find((p) => p.dataKey === "oos")?.value;
+  const is  = payload.find((p: any) => p.dataKey === "is")?.value;
+  const oos = payload.find((p: any) => p.dataKey === "oos")?.value;
 
   return (
-    <div className="rounded border border-border bg-elevated/98 px-3 py-2 text-xs space-y-1.5 min-w-[140px]">
-      <p className="font-mono font-medium text-text-primary border-b border-border pb-1.5 tracking-wide">
+    <div
+      className="rounded border px-3 py-2 text-xs space-y-1.5 min-w-[140px]"
+      style={{ background: c.tooltipBg, borderColor: c.tooltipBorder }}
+    >
+      <p className="font-mono font-medium border-b pb-1.5 tracking-wide"
+        style={{ color: c.tooltipItem, borderColor: c.tooltipBorder }}>
         {fmtDate(label as string)}
       </p>
       {is != null && (
         <div className="flex justify-between gap-4">
-          <span className="text-text-tertiary font-mono">IS</span>
-          <span className="font-mono tabular-nums text-text-tertiary">{(is as number).toFixed(1)}</span>
+          <span className="font-mono" style={{ color: c.tooltipLabel }}>IS</span>
+          <span className="font-mono tabular-nums" style={{ color: c.tooltipLabel }}>{(is as number).toFixed(1)}</span>
         </div>
       )}
       {oos != null && (
         <div className="flex justify-between gap-4">
-          <span className="text-accent font-mono">OOS</span>
-          <span className="font-mono tabular-nums text-accent">{(oos as number).toFixed(1)}</span>
+          <span className="font-mono" style={{ color: c.accent }}>OOS</span>
+          <span className="font-mono tabular-nums" style={{ color: c.accent }}>{(oos as number).toFixed(1)}</span>
         </div>
       )}
     </div>
@@ -78,11 +77,13 @@ function EquityTooltip({ active, payload, label }: TooltipProps<number, string>)
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface EquityCurveChartProps {
-  data:           EquityPoint[];
-  boundaryDate:   string | null;   // first OOS date; null if all IS
+  data:         EquityPoint[];
+  boundaryDate: string | null;
 }
 
 export function EquityCurveChart({ data, boundaryDate }: EquityCurveChartProps) {
+  const c = useChartColors();
+
   const ticks     = sparseTicks(data);
   const firstDate = data[0]?.date ?? "";
   const lastDate  = data[data.length - 1]?.date ?? "";
@@ -94,37 +95,33 @@ export function EquityCurveChart({ data, boundaryDate }: EquityCurveChartProps) 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={data} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid vertical={false} stroke={GRID} strokeDasharray="0" />
+        <CartesianGrid vertical={false} stroke={c.grid} strokeDasharray="0" />
 
-        {/* Background regions */}
         {boundaryDate ? (
           <>
-            {/* IS region — very subtle dark wash */}
             <ReferenceArea
               x1={firstDate} x2={boundaryDate}
-              fill="rgba(30,34,46,0.40)" fillOpacity={1}
+              fill={c.isRegion} fillOpacity={1}
               label={{
                 value: "IN-SAMPLE", position: "insideTopLeft",
-                fill: "#4D5562", fontSize: 9,
+                fill: c.tick.fill, fontSize: 9,
                 fontFamily: "var(--font-mono)",
                 fontWeight: 600, letterSpacing: 2, dx: 10, dy: 12,
               }}
             />
-            {/* OOS region — faint accent wash, this is the hero */}
             <ReferenceArea
               x1={boundaryDate} x2={lastDate}
-              fill="rgba(170,255,62,0.025)" fillOpacity={1}
+              fill={c.accentRegion} fillOpacity={1}
               label={{
                 value: "OUT-OF-SAMPLE", position: "insideTopLeft",
-                fill: "#AAFF3E", fontSize: 9,
+                fill: c.accent, fontSize: 9,
                 fontFamily: "var(--font-mono)",
                 fontWeight: 600, letterSpacing: 2, dx: 10, dy: 12,
               }}
             />
-            {/* Divider: accent-tinted dashed vertical */}
             <ReferenceLine
               x={boundaryDate}
-              stroke="rgba(170,255,62,0.35)"
+              stroke={c.accentBoundary}
               strokeWidth={1}
               strokeDasharray="4 3"
             />
@@ -132,57 +129,56 @@ export function EquityCurveChart({ data, boundaryDate }: EquityCurveChartProps) 
         ) : (
           <ReferenceArea
             x1={firstDate} x2={lastDate}
-            fill="rgba(30,34,46,0.40)" fillOpacity={1}
+            fill={c.isRegion} fillOpacity={1}
             label={{
               value: "IN-SAMPLE", position: "insideTopLeft",
-              fill: "#4D5562", fontSize: 9,
+              fill: c.tick.fill, fontSize: 9,
               fontFamily: "var(--font-mono)",
               fontWeight: 600, letterSpacing: 2, dx: 10, dy: 12,
             }}
           />
         )}
 
-        {/* Baseline at 100 */}
-        <ReferenceLine y={100} stroke="rgba(255,255,255,0.07)" strokeWidth={1} />
+        <ReferenceLine y={100} stroke={c.grid} strokeWidth={1} />
 
         <XAxis
           dataKey="date"
           ticks={ticks}
           tickFormatter={fmtDate}
-          tick={TICK}
+          tick={c.tick}
           axisLine={false} tickLine={false} tickMargin={8}
         />
         <YAxis
           domain={[yMin, yMax]}
-          tick={TICK}
+          tick={c.tick}
           axisLine={false} tickLine={false}
           width={36}
           tickFormatter={(v: number) => v.toFixed(0)}
         />
-        <Tooltip content={<EquityTooltip />} cursor={CURSOR} />
+        <Tooltip content={(props) => <EquityTooltip {...props} c={c} />} cursor={c.cursor} />
 
-        {/* IS line — muted, thin */}
+        {/* IS line — muted */}
         <Area
           dataKey="is"
           name="In-sample"
-          stroke="#3D4251"
+          stroke={c.is}
           strokeWidth={1}
-          fill="rgba(85,93,112,0.04)"
+          fill={c.isFill}
           dot={false}
           activeDot={false}
           connectNulls={false}
           isAnimationActive={false}
         />
 
-        {/* OOS line — accent, hero series */}
+        {/* OOS line — accent hero */}
         <Area
           dataKey="oos"
           name="Out-of-sample"
-          stroke="#AAFF3E"
+          stroke={c.accent}
           strokeWidth={1.5}
-          fill="rgba(170,255,62,0.06)"
+          fill={c.accentFill}
           dot={false}
-          activeDot={{ r: 3, fill: "#AAFF3E", strokeWidth: 0 }}
+          activeDot={{ r: 3, fill: c.accent, strokeWidth: 0 }}
           connectNulls={false}
           isAnimationActive={false}
         />
@@ -195,17 +191,22 @@ export function EquityCurveChart({ data, boundaryDate }: EquityCurveChartProps) 
 // Drawdown tooltip
 // ─────────────────────────────────────────────────────────────────────────────
 
-function DrawdownTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function DrawdownTooltip({ active, payload, label, c }: any) {
   if (!active || !payload?.length) return null;
   const dd = payload[0]?.value as number;
   return (
-    <div className="rounded border border-border bg-elevated/98 px-3 py-2 text-xs space-y-1 min-w-[130px]">
-      <p className="font-mono font-medium text-text-primary border-b border-border pb-1.5 tracking-wide">
+    <div
+      className="rounded border px-3 py-2 text-xs space-y-1 min-w-[130px]"
+      style={{ background: c.tooltipBg, borderColor: c.tooltipBorder }}
+    >
+      <p className="font-mono font-medium border-b pb-1.5 tracking-wide"
+        style={{ color: c.tooltipItem, borderColor: c.tooltipBorder }}>
         {fmtDate(label as string)}
       </p>
       <div className="flex justify-between gap-4">
-        <span className="text-text-tertiary font-mono">DD</span>
-        <span className={`font-mono tabular-nums ${dd < -5 ? "text-loss" : dd < -2 ? "text-warn" : "text-text-secondary"}`}>
+        <span className="font-mono" style={{ color: c.tooltipLabel }}>DD</span>
+        <span className="font-mono tabular-nums"
+          style={{ color: dd < -5 ? c.loss : dd < -2 ? c.warn : c.tooltipItem }}>
           {dd.toFixed(2)}%
         </span>
       </div>
@@ -214,7 +215,7 @@ function DrawdownTooltip({ active, payload, label }: TooltipProps<number, string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Drawdown / underwater chart
+// Drawdown chart
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface DrawdownChartProps {
@@ -224,6 +225,8 @@ interface DrawdownChartProps {
 }
 
 export function DrawdownChart({ data, boundaryDate, minDD }: DrawdownChartProps) {
+  const c = useChartColors();
+
   const ticks     = sparseTicks(data);
   const firstDate = data[0]?.date ?? "";
   const lastDate  = data[data.length - 1]?.date ?? "";
@@ -232,50 +235,48 @@ export function DrawdownChart({ data, boundaryDate, minDD }: DrawdownChartProps)
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid vertical={false} stroke={GRID} strokeDasharray="0" />
+        <CartesianGrid vertical={false} stroke={c.grid} strokeDasharray="0" />
 
-        {/* Background regions matching equity chart */}
         {boundaryDate ? (
           <>
-            <ReferenceArea x1={firstDate} x2={boundaryDate} fill="rgba(30,34,46,0.30)" fillOpacity={1} />
-            <ReferenceArea x1={boundaryDate} x2={lastDate}  fill="rgba(255,64,64,0.03)"  fillOpacity={1} />
+            <ReferenceArea x1={firstDate} x2={boundaryDate} fill={c.isRegion}     fillOpacity={1} />
+            <ReferenceArea x1={boundaryDate} x2={lastDate}  fill={c.accentRegion} fillOpacity={1} />
             <ReferenceLine
               x={boundaryDate}
-              stroke="rgba(170,255,62,0.35)"
+              stroke={c.accentBoundary}
               strokeWidth={1}
               strokeDasharray="4 3"
             />
           </>
         ) : (
-          <ReferenceArea x1={firstDate} x2={lastDate} fill="rgba(30,34,46,0.30)" fillOpacity={1} />
+          <ReferenceArea x1={firstDate} x2={lastDate} fill={c.isRegion} fillOpacity={1} />
         )}
 
-        {/* 0% baseline */}
-        <ReferenceLine y={0} stroke="rgba(255,255,255,0.10)" strokeWidth={1} />
+        <ReferenceLine y={0} stroke={c.grid} strokeWidth={1} />
 
         <XAxis
           dataKey="date"
           ticks={ticks}
           tickFormatter={fmtDate}
-          tick={TICK}
+          tick={c.tick}
           axisLine={false} tickLine={false} tickMargin={8}
         />
         <YAxis
           domain={[yMin, 0]}
-          tick={TICK}
+          tick={c.tick}
           axisLine={false} tickLine={false}
           width={36}
           tickFormatter={(v: number) => `${v.toFixed(0)}%`}
         />
-        <Tooltip content={<DrawdownTooltip />} cursor={CURSOR} />
+        <Tooltip content={(props) => <DrawdownTooltip {...props} c={c} />} cursor={c.cursor} />
 
         <Area
           dataKey="dd"
-          stroke="#FF4040"
+          stroke={c.loss}
           strokeWidth={1.5}
-          fill="rgba(255,64,64,0.10)"
+          fill={c.ddFill}
           dot={false}
-          activeDot={{ r: 3, fill: "#FF4040", strokeWidth: 0 }}
+          activeDot={{ r: 3, fill: c.loss, strokeWidth: 0 }}
           isAnimationActive={false}
           baseValue={0}
         />

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const SESSION_COOKIE = "26miles_session";
 
@@ -25,7 +26,6 @@ function TopNav() {
   const router    = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
 
-  // Re-check cookie on every route change (post-login / post-logout hydration)
   useEffect(() => {
     setLoggedIn(document.cookie.includes(`${SESSION_COOKIE}=`));
   }, [pathname]);
@@ -39,7 +39,7 @@ function TopNav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-canvas/90 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo (image with accessible fallback) */}
+        {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-3 group"
@@ -84,6 +84,9 @@ function TopNav() {
             Live
           </span>
 
+          {/* Theme toggle */}
+          <ThemeToggle />
+
           {loggedIn ? (
             <button
               onClick={logout}
@@ -103,7 +106,7 @@ function TopNav() {
               </Link>
               <Link
                 href="/submit"
-                className="hidden sm:inline-flex items-center rounded px-3 py-1.5 text-sm font-semibold bg-accent hover:bg-accent/90 text-canvas transition-colors"
+                className="hidden sm:inline-flex items-center rounded px-3 py-1.5 text-sm font-semibold bg-accent hover:bg-accent/90 text-on-accent transition-colors"
               >
                 Submit Strategy
               </Link>
@@ -122,7 +125,6 @@ function TopNav() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // Login page is fully self-contained — no nav/footer chrome
   if (pathname === "/login") {
     return <>{children}</>;
   }
@@ -142,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Page container — reusable width/padding wrapper
+// Page container
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function PageContainer({
