@@ -16,4 +16,8 @@ export const GLOSSARY = {
   retainer:         "A fixed base amount paid while your strategy is in use.",
   selectionBonus:   "A one-time reward when your strategy passes validation and goes live.",
   lifecycleState:   "Where a strategy is — Incubation, Paper/Forward-test, Live, Decaying, or Retired.",
+  pointInTime:      "Data includes only information that was known at that historical date — no future values are accidentally included, so backtests aren't biased by hindsight.",
+  survivorshipFree: "Includes securities that were delisted, merged, or failed — not just survivors — preventing an illusion of better historical returns.",
+  updateCadence:    "How frequently the dataset is refreshed with new data after the source publishes it.",
+  accessTier:       "Your access level: Free (all researchers), Verified (identity-checked), or Allocated (researchers with live capital deployed by 26 Miles).",
 } as const;

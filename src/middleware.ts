@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/submit", "/leaderboard", "/strategy"];
+const PROTECTED_PREFIXES = ["/dashboard", "/submit", "/leaderboard", "/strategy", "/data"];
 const SESSION_COOKIE = "26miles_session";
 
 export function middleware(request: NextRequest) {
@@ -31,5 +31,7 @@ export const config = {
     "/submit/:path*",
     "/leaderboard/:path*",
     "/strategy/:path*",
+    "/data/:path*",
+    "/data",
   ],
 };

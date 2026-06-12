@@ -10,6 +10,7 @@ const SESSION_COOKIE = "26miles_session";
 
 const NAV_LINKS = [
   { href: "/dashboard",   label: "Dashboard"   },
+  { href: "/data",        label: "Research Lab" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/income",      label: "How you earn" },
   { href: "/submit",      label: "Submit"      },
