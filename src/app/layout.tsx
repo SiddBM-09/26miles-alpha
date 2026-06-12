@@ -30,14 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable}`}>
-      <head>
-        {/* Anti-flicker: read saved theme before React hydrates to avoid flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('26miles_theme')==='light')document.documentElement.classList.add('light')}catch(e){}`,
-          }}
-        />
-      </head>
+      <head />
       <body>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
