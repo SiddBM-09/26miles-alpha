@@ -20,7 +20,7 @@ export function MetricLabel({ label, tooltip, className, labelClassName }: Metri
           role="tooltip"
           className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50
                      hidden group-hover:block w-52 rounded-lg border border-border bg-elevated
-                     shadow-card px-3 py-2 text-xs text-text-secondary leading-relaxed whitespace-normal"
+                     px-3 py-2 text-xs text-text-secondary leading-relaxed whitespace-normal"
         >
           {tooltip}
           <span className="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0

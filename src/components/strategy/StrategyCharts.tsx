@@ -51,7 +51,7 @@ function EquityTooltip({ active, payload, label }: TooltipProps<number, string>)
   const oos = payload.find((p) => p.dataKey === "oos")?.value;
 
   return (
-    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-2.5 shadow-card text-xs space-y-1.5 min-w-[140px]">
+    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-2.5 text-xs space-y-1.5 min-w-[140px]">
       <p className="font-medium text-text-primary border-b border-border pb-1.5">{fmtDate(label as string)}</p>
       {is  != null && (
         <div className="flex justify-between gap-4">
@@ -191,7 +191,7 @@ function DrawdownTooltip({ active, payload, label }: TooltipProps<number, string
   if (!active || !payload?.length) return null;
   const dd = payload[0]?.value as number;
   return (
-    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-2.5 shadow-card text-xs space-y-1 min-w-[130px]">
+    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-2.5 text-xs space-y-1 min-w-[130px]">
       <p className="font-medium text-text-primary border-b border-border pb-1.5">{fmtDate(label as string)}</p>
       <div className="flex justify-between gap-4">
         <span className="text-text-tertiary">Drawdown</span>

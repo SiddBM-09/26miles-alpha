@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
   const total    = (retainer as number) + (perfFee as number);
 
   return (
-    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-3 shadow-card text-xs space-y-2 min-w-[160px]">
+    <div className="rounded-lg border border-border bg-elevated/95 backdrop-blur-sm px-3.5 py-3 text-xs space-y-2 min-w-[160px]">
       <p className="font-medium text-text-primary border-b border-border pb-1.5">{label}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-4">

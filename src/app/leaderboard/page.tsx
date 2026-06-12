@@ -338,7 +338,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Table */}
-      <div className="border border-border rounded-xl overflow-hidden">
+      <div className="border border-border rounded-lg overflow-hidden">
 
         {/* Desktop header */}
         <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-3 bg-elevated border-b border-border">

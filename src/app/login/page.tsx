@@ -104,7 +104,7 @@ function LoginForm() {
         </div>
 
         {/* Demo credentials — always visible, can't miss */}
-        <div className="rounded-xl border border-accent/25 bg-accent/5 p-4 space-y-3">
+        <div className="rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-accent uppercase tracking-wider font-mono">
               Demo credentials
@@ -151,7 +151,7 @@ function LoginForm() {
               placeholder="you@example.com"
               required
               className={cn(
-                "w-full rounded-lg bg-surface border px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary",
+                "w-full rounded bg-surface border px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary",
                 "focus:outline-none focus:ring-1 focus:ring-accent/60 focus:border-accent/60 transition-colors",
                 error ? "border-loss/60" : "border-border"
               )}
@@ -173,7 +173,7 @@ function LoginForm() {
                 placeholder="••••••••"
                 required
                 className={cn(
-                  "w-full rounded-lg bg-surface border px-3.5 py-2.5 pr-10 text-sm text-text-primary placeholder:text-text-tertiary",
+                  "w-full rounded bg-surface border px-3.5 py-2.5 pr-10 text-sm text-text-primary placeholder:text-text-tertiary",
                   "focus:outline-none focus:ring-1 focus:ring-accent/60 focus:border-accent/60 transition-colors",
                   error ? "border-loss/60" : "border-border"
                 )}
@@ -199,7 +199,7 @@ function LoginForm() {
             type="submit"
             disabled={loading}
             className={cn(
-              "w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
+              "w-full flex items-center justify-center gap-2 rounded px-4 py-2.5 text-sm font-semibold transition-colors",
               loading
                 ? "bg-accent/40 text-canvas/50 cursor-not-allowed"
                 : "bg-accent hover:bg-accent/90 text-canvas"
@@ -207,7 +207,7 @@ function LoginForm() {
           >
             {loading ? (
               <>
-                <span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <span className="h-3.5 w-3.5 rounded-full border-2 border-canvas/30 border-t-canvas animate-spin" />
                 Signing in…
               </>
             ) : (
@@ -220,7 +220,7 @@ function LoginForm() {
         </form>
 
         {/* Trust note */}
-        <div className="flex items-start gap-2.5 rounded-lg border border-border bg-elevated/40 px-3.5 py-3">
+        <div className="flex items-start gap-2.5 rounded border border-border bg-elevated/40 px-3.5 py-3">
           <Shield className="h-3.5 w-3.5 text-text-tertiary flex-shrink-0 mt-0.5" />
           <p className="text-2xs text-text-tertiary leading-relaxed">
             Access is restricted to authorised researchers and 26 Miles Capital staff.

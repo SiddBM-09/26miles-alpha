@@ -101,7 +101,7 @@ function HWMTooltip({ active, payload }: any) {
   const d = payload[0].payload as { month: string; nav: number; hwm: number };
   const above = d.nav >= d.hwm - 0.01;
   return (
-    <div className="rounded-lg border border-border bg-elevated px-3 py-2 shadow-card text-xs font-mono">
+    <div className="rounded border border-border bg-elevated px-3 py-2 text-xs font-mono">
       <p className="text-text-secondary mb-1.5 font-medium">{d.month}</p>
       <p className="text-profit">NAV  {d.nav.toFixed(1)}</p>
       <p className="text-warn">HWM  {d.hwm.toFixed(1)}</p>
@@ -255,7 +255,7 @@ function ComponentCard({ card }: { card: CardDef }) {
   const { Icon } = card;
   return (
     <div className={cn(
-      "rounded-xl border p-6 flex flex-col gap-5 transition-colors",
+      "rounded-lg border p-6 flex flex-col gap-5 transition-colors",
       card.bg, card.border
     )}>
       <div className="flex items-start justify-between gap-3">
@@ -308,7 +308,7 @@ export default function IncomePage() {
         </div>
 
         {/* Quick-stat strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border rounded-xl overflow-hidden border border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border rounded-lg overflow-hidden border border-border">
           {([
             { label: "Base retainer",     tooltip: GLOSSARY.retainer,         value: "₹15K – ₹1L", sub: "per month, while active"   },
             { label: "Performance share", tooltip: GLOSSARY.performanceShare,  value: "10 – 20%",    sub: "of net P&L above HWM"      },
@@ -447,7 +447,7 @@ export default function IncomePage() {
         </div>
 
         {/* Monthly table */}
-        <div className="border border-border rounded-xl overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden">
 
           {/* Header */}
           <div className="hidden sm:grid sm:grid-cols-[4rem_1fr_5rem_5rem_8rem_6rem_5rem_6rem] gap-x-3 px-5 py-2.5 bg-elevated border-b border-border">
@@ -556,7 +556,7 @@ export default function IncomePage() {
           </p>
         </div>
 
-        <div className="border border-border rounded-xl overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden">
           {/* Header */}
           <div className="grid grid-cols-[6rem_1fr_6rem_8rem] sm:grid-cols-[8rem_1fr_8rem_10rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
             {([

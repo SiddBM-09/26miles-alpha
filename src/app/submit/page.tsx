@@ -471,7 +471,7 @@ function AIStrategyMaker({ form, update }: {
       <div className="space-y-4 animate-fade-in">
 
         {/* Result card */}
-        <div className="rounded-xl border border-accent/30 bg-surface overflow-hidden">
+        <div className="rounded-lg border border-accent/30 bg-surface overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between gap-3 px-5 py-3.5 bg-elevated border-b border-border">
             <div className="flex items-center gap-2.5">
@@ -587,7 +587,7 @@ function AIStrategyMaker({ form, update }: {
       </div>
 
       {/* Visual rule builder */}
-      <div className="rounded-xl border border-border bg-elevated/30 p-5 space-y-3">
+      <div className="rounded-lg border border-border bg-elevated/30 p-5 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-medium text-text-secondary">Visual rule builder</p>
@@ -639,7 +639,7 @@ function AIStrategyMaker({ form, update }: {
         >
           {generating ? (
             <>
-              <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              <span className="h-4 w-4 rounded-full border-2 border-canvas/30 border-t-canvas animate-spin" />
               {GEN_MESSAGES[msgIdx]}
             </>
           ) : (
@@ -842,9 +842,9 @@ function Step1({ form, update }: { form: FormState; update: (p: Partial<FormStat
               key={t.id}
               onClick={() => update({ submissionType: t.id })}
               className={cn(
-                "relative w-full text-left rounded-xl border p-5 flex flex-col gap-4 transition-all text-left",
+                "relative w-full text-left rounded-lg border p-5 flex flex-col gap-4 transition-all text-left",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
-                selected ? `${t.selectedBorder} ${t.selectedBg} shadow-card` : `${t.border} bg-surface`
+                selected ? `${t.selectedBorder} ${t.selectedBg}` : `${t.border} bg-surface`
               )}
             >
               {t.flagship && (
@@ -1083,7 +1083,7 @@ function Step3({ form }: { form: FormState }) {
       </div>
 
       {/* Summary */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+      <div className="rounded-lg border border-border bg-surface overflow-hidden">
         <div className="px-4 py-2.5 bg-elevated border-b border-border">
           <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">Submission summary</span>
         </div>
@@ -1100,7 +1100,7 @@ function Step3({ form }: { form: FormState }) {
 
       {/* AI result preview */}
       {form.submissionType === "ai" && form.aiResult && (
-        <div className="rounded-xl border border-accent/20 bg-accent/5 px-5 py-4 space-y-2">
+        <div className="rounded-lg border border-accent/20 bg-accent/5 px-5 py-4 space-y-2">
           <div className="flex items-center gap-2">
             <Bot className="h-4 w-4 text-accent flex-shrink-0" />
             <span className="text-xs font-medium text-text-primary">AI-generated strategy attached</span>
@@ -1115,7 +1115,7 @@ function Step3({ form }: { form: FormState }) {
       )}
 
       {/* Provenance + agreement */}
-      <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 space-y-3">
+      <div className="rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-accent flex-shrink-0" />
           <span className="text-sm font-medium text-text-primary">What happens on submit</span>
@@ -1189,7 +1189,7 @@ function ConfirmationScreen({ conf, strategyName }: { conf: Confirmation; strate
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface text-left overflow-hidden">
+      <div className="rounded-lg border border-border bg-surface text-left overflow-hidden">
         <div className="px-5 py-3 bg-elevated border-b border-border flex items-center justify-between">
           <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">Submission receipt</span>
           <span className="font-mono text-xs text-accent">{conf.submissionId}</span>
@@ -1220,7 +1220,7 @@ function ConfirmationScreen({ conf, strategyName }: { conf: Confirmation; strate
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface p-5 text-left space-y-3">
+      <div className="rounded-lg border border-border bg-surface p-5 text-left space-y-3">
         <p className="text-xs font-mono text-text-tertiary uppercase tracking-wider">What happens next</p>
         <div className="space-y-3">
           {[
@@ -1364,7 +1364,7 @@ function NavBar({ step, form, onBack, onNext, onSubmit, submitting }: {
             className="inline-flex items-center gap-1.5 rounded px-5 py-2 text-sm font-semibold bg-accent hover:bg-accent/90 text-canvas transition-colors disabled:opacity-60"
           >
             {submitting ? (
-              <><span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Submitting…</>
+              <><span className="h-3.5 w-3.5 rounded-full border-2 border-canvas/30 border-t-canvas animate-spin" /> Submitting…</>
             ) : (
               <>Submit strategy <ArrowRight className="h-4 w-4" /></>
             )}

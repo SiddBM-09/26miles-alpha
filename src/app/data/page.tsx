@@ -502,7 +502,7 @@ const ASSET_COLORS: Record<DataAsset, string> = {
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 rounded-xl border border-accent/30 bg-elevated shadow-card-hover px-5 py-3 animate-fade-in">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 rounded-lg border border-accent/30 bg-elevated px-5 py-3 animate-fade-in">
       <FlaskConical className="h-4 w-4 text-accent flex-shrink-0" />
       <span className="text-sm text-text-primary">{message}</span>
       <button onClick={onClose} className="ml-1 text-text-tertiary hover:text-text-primary transition-colors">
@@ -707,7 +707,7 @@ function DatasetDetail({
       </div>
 
       {/* Chart */}
-      <div className="rounded-xl border border-border bg-surface p-4">
+      <div className="rounded-lg border border-border bg-surface p-4">
         <p className="text-xs font-mono text-text-tertiary uppercase tracking-wider mb-3">
           {ds.id === "fo-chain"        ? "NIFTY call OI by strike — 30 May 2024 expiry"
            : ds.id === "nse-ohlcv"    ? "RELIANCE close price — 12-month trailing"
@@ -722,7 +722,7 @@ function DatasetDetail({
       </div>
 
       {/* Data preview */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+      <div className="rounded-lg border border-border bg-surface overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-elevated">
           <Table2 className="h-3.5 w-3.5 text-text-tertiary" />
           <span className="text-xs font-mono text-text-tertiary uppercase tracking-wider">Data preview — sample rows</span>
@@ -754,7 +754,7 @@ function DatasetDetail({
       </div>
 
       {/* Schema */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+      <div className="rounded-lg border border-border bg-surface overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-elevated">
           <Database className="h-3.5 w-3.5 text-text-tertiary" />
           <span className="text-xs font-mono text-text-tertiary uppercase tracking-wider">Schema — column definitions</span>
@@ -870,7 +870,7 @@ export default function DataPage() {
       <div className="flex flex-col lg:flex-row gap-4 items-start">
 
         {/* Left — catalog */}
-        <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 rounded-xl border border-border bg-surface overflow-hidden">
+        <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 rounded-lg border border-border bg-surface overflow-hidden">
 
           {/* Search bar */}
           <div className="p-3 border-b border-border space-y-2">
@@ -981,14 +981,14 @@ export default function DataPage() {
         </div>
 
         {/* Right — detail */}
-        <div className="flex-1 min-w-0 rounded-xl border border-border bg-surface p-5">
+        <div className="flex-1 min-w-0 rounded-lg border border-border bg-surface p-5">
           <DatasetDetail ds={selected} onSandbox={openSandbox} />
         </div>
 
       </div>
 
       {/* ── How research works ── */}
-      <div className="rounded-xl border border-border bg-surface p-6">
+      <div className="rounded-lg border border-border bg-surface p-6">
         <h2 className="text-base font-semibold text-text-primary mb-4">How research works here</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[

@@ -99,7 +99,7 @@ function HWMStatusCard({
 
   return (
     <div className={cn(
-      "card p-4 flex flex-col gap-1 transition-shadow hover:shadow-card-hover",
+      "card p-4 flex flex-col gap-1 transition-colors",
       above ? "hover:border-profit/20" : "hover:border-loss/20"
     )}>
       <div className="flex items-center justify-between">
@@ -143,7 +143,7 @@ function StrategyTable({ rows }: { rows: StrategyRow[] }) {
   const ordered = [...live, ...rest];
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       {/* Header */}
       <div className="hidden sm:grid sm:grid-cols-[1fr_8rem_6rem_8rem_8rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
         {([
