@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Copy, Check, ArrowRight, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,6 @@ function CopyButton({ text }: { text: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function LoginForm() {
-  const router       = useRouter();
   const searchParams = useSearchParams();
   const redirectTo   = searchParams.get("from") || "/dashboard";
 
@@ -71,7 +70,9 @@ function LoginForm() {
     ) {
       // Set session cookie (7-day, accessible to middleware)
       document.cookie = `${SESSION_COOKIE}=authenticated; path=/; max-age=604800; SameSite=Lax`;
-      router.replace(redirectTo);
+      // Hard navigation so the middleware reads the fresh cookie on the request
+      // and the router cache doesn't interfere.
+      window.location.replace(redirectTo);
     } else {
       setError("Invalid email or password. Use the demo credentials below.");
       setLoading(false);

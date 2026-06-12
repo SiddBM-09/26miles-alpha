@@ -3,6 +3,8 @@ import { ArrowRight, Lock, BarChart2, ChevronRight, CheckCircle2, TrendingUp, Tr
 import { STRATEGIES } from "@/lib/mock/strategies";
 import { RESEARCHERS } from "@/lib/mock/researchers";
 import { LifecycleBadge, CheckBadge } from "@/components/ui/StatusBadge";
+import { MetricLabel } from "@/components/ui/MetricLabel";
+import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -36,14 +38,14 @@ function HeroValidationCard() {
 
         {/* Metric grid */}
         <div className="grid grid-cols-2 divide-x divide-y divide-border">
-          {[
-            { label: "OOS Sharpe",   value: "1.84",  sub: "out-of-sample",  up: true  },
-            { label: "Max Drawdown", value: "−7.3%", sub: "since inception", up: false },
-            { label: "Capacity",     value: "$8.5M", sub: "est. AUM ceiling", up: null },
-            { label: "Turnover",     value: "2.1×",  sub: "per day",          up: null },
-          ].map(({ label, value, sub, up }) => (
+          {([
+            { label: "OOS Sharpe",   tooltip: GLOSSARY.sharpeRatio, value: "1.84",  sub: "out-of-sample",   up: true  },
+            { label: "Max Drawdown", tooltip: GLOSSARY.drawdown,    value: "−7.3%", sub: "since inception",  up: false },
+            { label: "Capacity",     tooltip: GLOSSARY.capacity,    value: "$8.5M", sub: "est. AUM ceiling", up: null  },
+            { label: "Turnover",     tooltip: GLOSSARY.turnover,    value: "2.1×",  sub: "per day",          up: null  },
+          ] as { label: string; tooltip: string; value: string; sub: string; up: boolean | null }[]).map(({ label, tooltip, value, sub, up }) => (
             <div key={label} className="px-4 py-3">
-              <p className="text-2xs text-text-tertiary uppercase tracking-wider font-mono">{label}</p>
+              <MetricLabel label={label} tooltip={tooltip} labelClassName="text-2xs text-text-tertiary uppercase tracking-wider font-mono" />
               <p className={cn(
                 "font-mono text-lg font-semibold tabular-nums mt-0.5",
                 up === true  ? "text-profit" :
@@ -120,8 +122,8 @@ function Hero() {
             <p className="text-md text-text-secondary leading-relaxed max-w-lg mx-auto lg:mx-0 mb-8">
               Upload a strategy. We validate it with rigorous out-of-sample
               testing, walk-forward analysis, and overfitting checks.
-              Strategies that survive get real capital — and you earn
-              a share of every rupee of P&amp;L they generate.
+              Strategies that pass get 26 Miles' own capital behind them —
+              and you earn a performance share of every rupee of P&amp;L.
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-12">
@@ -185,7 +187,7 @@ const STEPS = [
   {
     num: "03",
     title: "You earn",
-    body: "Strategies that pass go live with real capital. You receive a fixed monthly retainer from day one, plus a performance share of live P&L tracked against a transparent high-water mark.",
+    body: "Strategies that pass go live with 26 Miles' own capital. You receive a fixed monthly retainer from day one, plus a performance share of live P&L tracked against a transparent high-water mark.",
     detail: "Monthly payouts · High-water mark tracked · No lock-in",
   },
 ];
@@ -339,7 +341,7 @@ function LeaderboardStrip() {
           <div>
             <p className="text-xs font-mono text-accent uppercase tracking-widest mb-3">Leaderboard</p>
             <h2 className="text-2xl sm:text-3xl font-semibold text-text-primary tracking-tight">
-              The strategies earning capital right now.
+              Live strategies with 26 Miles' capital deployed.
             </h2>
             <p className="text-sm text-text-secondary mt-2 max-w-lg">
               Ranked by out-of-sample Sharpe — the only metric that matters.
@@ -359,8 +361,20 @@ function LeaderboardStrip() {
         <div className="border border-border rounded-xl overflow-hidden">
           {/* Header */}
           <div className="hidden sm:grid grid-cols-[2rem_1fr_7rem_6rem_6rem_6rem_7rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
-            {["#", "Strategy", "Asset class", "OOS Sharpe", "Backtest", "Max DD", "State"].map((h) => (
-              <span key={h} className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">{h}</span>
+            {([
+              { h: "#",           tooltip: undefined },
+              { h: "Strategy",    tooltip: undefined },
+              { h: "Asset class", tooltip: undefined },
+              { h: "OOS Sharpe",  tooltip: GLOSSARY.sharpeRatio },
+              { h: "Backtest",    tooltip: GLOSSARY.inSample },
+              { h: "Max DD",      tooltip: GLOSSARY.drawdown },
+              { h: "State",       tooltip: GLOSSARY.lifecycleState },
+            ] as { h: string; tooltip?: string }[]).map(({ h, tooltip }) => (
+              <span key={h} className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
+                {tooltip
+                  ? <MetricLabel label={h} tooltip={tooltip} labelClassName="text-2xs font-mono text-text-tertiary uppercase tracking-wider" />
+                  : h}
+              </span>
             ))}
           </div>
 

@@ -8,7 +8,9 @@ import type { EquityPoint as RawPoint } from "@/lib/mock/equityCurves";
 import { PageContainer } from "@/components/AppShell";
 import { CheckBadge, LifecycleBadge } from "@/components/ui/StatusBadge";
 import { MetricCard } from "@/components/ui/MetricCard";
+import { MetricLabel } from "@/components/ui/MetricLabel";
 import { SectionDivider } from "@/components/ui/SectionHeading";
+import { GLOSSARY } from "@/lib/glossary";
 import {
   EquityCurveChart, DrawdownChart,
   type EquityPoint, type DrawdownPoint,
@@ -212,10 +214,10 @@ function StrategyHeader({ s, ownerHandle }: { s: Strategy; ownerHandle: string }
 
 // Check cards — detailed strip
 const CHECK_META = {
-  overfitting:  { label: "Overfitting",      desc: "Deflated Sharpe & PBO" },
-  dataLeakage:  { label: "Data Leakage",     desc: "Look-ahead & split audit" },
-  walkForward:  { label: "Walk-forward",     desc: "Sub-period stability" },
-  capacityTest: { label: "Capacity",         desc: "AUM ceiling & turnover" },
+  overfitting:  { label: "Overfitting",  desc: "Deflated Sharpe & PBO",   tooltip: GLOSSARY.overfitting  },
+  dataLeakage:  { label: "Data Leakage", desc: "Look-ahead & split audit", tooltip: GLOSSARY.dataLeakage  },
+  walkForward:  { label: "Walk-forward", desc: "Sub-period stability",      tooltip: GLOSSARY.walkForward  },
+  capacityTest: { label: "Capacity",     desc: "AUM ceiling & turnover",   tooltip: GLOSSARY.capacity     },
 } as const;
 
 function ChecksStrip({ s }: { s: Strategy }) {
@@ -260,7 +262,10 @@ function ChecksStrip({ s }: { s: Strategy }) {
             "rounded-lg border p-4 flex flex-col gap-2.5 transition-colors",
             bgColor, borderColor
           )}>
-            <CheckBadge status={status} label={meta.label} />
+            <div className="flex items-center gap-2">
+              <CheckBadge status={status} />
+              <MetricLabel label={meta.label} tooltip={meta.tooltip} labelClassName="text-xs text-text-secondary font-medium" />
+            </div>
             <div>
               <p className="text-2xs text-text-tertiary font-mono">{meta.desc}</p>
               <p className="text-xs text-text-secondary mt-0.5">{detail}</p>
@@ -322,10 +327,14 @@ function LifecycleTimeline({ s }: { s: Strategy }) {
 }
 
 // Muted IS metric card
-function ISMetricCard({ label, value, unit }: { label: string; value: string; unit?: string }) {
+function ISMetricCard({ label, value, unit, tooltip }: { label: string; value: string; unit?: string; tooltip?: string }) {
   return (
     <div className="rounded border border-border/50 bg-surface/50 px-3 py-2.5 flex flex-col gap-0.5">
-      <span className="text-2xs text-text-tertiary uppercase tracking-wider font-mono">{label}</span>
+      {tooltip ? (
+        <MetricLabel label={label} tooltip={tooltip} labelClassName="text-2xs text-text-tertiary uppercase tracking-wider font-mono" />
+      ) : (
+        <span className="text-2xs text-text-tertiary uppercase tracking-wider font-mono">{label}</span>
+      )}
       <div className="flex items-baseline gap-1">
         <span className="font-mono text-base tabular-nums text-text-tertiary">{value}</span>
         {unit && <span className="text-2xs text-text-tertiary font-mono">{unit}</span>}
@@ -336,12 +345,13 @@ function ISMetricCard({ label, value, unit }: { label: string; value: string; un
 
 // Risk row in the capacity table
 function RiskRow({
-  label, value, sub, color = "neutral",
+  label, value, sub, color = "neutral", tooltip,
 }: {
   label: string;
   value: string;
   sub?: string;
   color?: "positive" | "negative" | "neutral";
+  tooltip?: string;
 }) {
   const textColor =
     color === "positive" ? "text-profit" :
@@ -349,7 +359,11 @@ function RiskRow({
 
   return (
     <div className="flex items-center justify-between py-2.5 border-b border-border last:border-b-0">
-      <span className="text-sm text-text-secondary">{label}</span>
+      {tooltip ? (
+        <MetricLabel label={label} tooltip={tooltip} labelClassName="text-sm text-text-secondary" />
+      ) : (
+        <span className="text-sm text-text-secondary">{label}</span>
+      )}
       <div className="text-right">
         <span className={cn("font-mono text-sm tabular-nums font-medium", textColor)}>{value}</span>
         {sub && <span className="text-2xs text-text-tertiary font-mono ml-1.5">{sub}</span>}
@@ -449,7 +463,10 @@ export default async function StrategyPage({ params }: Props) {
       <section className="card p-5 space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold text-text-primary">Drawdown / Underwater</h2>
+            <h2 className="text-base font-semibold text-text-primary">
+              <MetricLabel label="Drawdown" tooltip={GLOSSARY.drawdown} labelClassName="text-base font-semibold text-text-primary" />
+              {" "}/ Underwater
+            </h2>
             <p className="text-xs text-text-secondary mt-0.5">
               Running drawdown from prior peak · Max {s.maxDrawdownPct.toFixed(1)}%
             </p>
@@ -482,6 +499,7 @@ export default async function StrategyPage({ params }: Props) {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <MetricCard
               label="OOS Sharpe"
+              tooltip={GLOSSARY.sharpeRatio}
               value={s.oosSharp.toFixed(2)}
               trend={s.oosSharp >= 1.0 ? "up" : "down"}
               annotation="out-of-sample, RF 6%"
@@ -489,24 +507,28 @@ export default async function StrategyPage({ params }: Props) {
             />
             <MetricCard
               label="Max Drawdown"
+              tooltip={GLOSSARY.drawdown}
               value={`${oosMaxDD.toFixed(1)}%`}
               trend="down"
               annotation="OOS period"
             />
             <MetricCard
               label="OOS Return"
+              tooltip={GLOSSARY.oos}
               value={`${oosAnnReturn != null ? (oosAnnReturn > 0 ? "+" : "") + oosAnnReturn.toFixed(1) : "—"}%`}
               trend={oosAnnReturn != null && oosAnnReturn > 0 ? "up" : "down"}
               annotation="annualised net"
             />
             <MetricCard
               label="Deflated Sharpe"
+              tooltip={GLOSSARY.overfitting}
               value={s.deflatedSharpe.toFixed(2)}
               trend={s.deflatedSharpe >= 1.0 ? "up" : "down"}
               annotation="PBO-adjusted"
             />
             <MetricCard
               label="PBO Score"
+              tooltip={GLOSSARY.overfitting}
               value={`${Math.round(s.pboScore * 100)}%`}
               trend={s.pboScore <= 0.20 ? "up" : "down"}
               subValue={s.pboScore <= 0.20 ? "Low — good" : s.pboScore <= 0.40 ? "Moderate" : "High — concern"}
@@ -515,6 +537,7 @@ export default async function StrategyPage({ params }: Props) {
             {retention != null && (
               <MetricCard
                 label="Sharpe Retention"
+                tooltip={GLOSSARY.sharpeRatio}
                 value={`${retention}%`}
                 trend={retention >= 65 ? "up" : "down"}
                 subValue={`${isSharpe.toFixed(2)} → ${s.oosSharp.toFixed(2)}`}
@@ -533,7 +556,8 @@ export default async function StrategyPage({ params }: Props) {
         {wfSharpes.length === 3 && (
           <div className="card px-5 py-4">
             <p className="text-2xs text-text-tertiary uppercase tracking-wider font-mono mb-3">
-              Walk-forward — 3 equal OOS sub-periods
+              <MetricLabel label="Walk-forward" tooltip={GLOSSARY.walkForward} labelClassName="text-2xs text-text-tertiary uppercase tracking-wider font-mono" />
+              {" "}— 3 equal OOS sub-periods
             </p>
             <div className="grid grid-cols-3 divide-x divide-border">
               {wfSharpes.map((sh, i) => (
@@ -567,12 +591,12 @@ export default async function StrategyPage({ params }: Props) {
             <span className="h-px flex-1 bg-border inline-block" />
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 opacity-55">
-            <ISMetricCard label="IS Sharpe"   value={isSharpe.toFixed(2)} />
-            <ISMetricCard label="IS Max DD"   value={`${isMaxDD.toFixed(1)}%`} />
-            <ISMetricCard label="IS Return"   value={`${isAnnReturn > 0 ? "+" : ""}${isAnnReturn.toFixed(1)}%`} unit="ann." />
-            <ISMetricCard label="IS Months"   value={String(isCurve.length)} />
-            <ISMetricCard label="IS Period"   value={`${isCurve[0]?.date ?? "—"}`} unit="start" />
-            <ISMetricCard label="Backtest"    value={s.backtestSharpe.toFixed(2)} unit="Sharpe" />
+            <ISMetricCard label="IS Sharpe"  tooltip={GLOSSARY.inSample}   value={isSharpe.toFixed(2)} />
+            <ISMetricCard label="IS Max DD"  tooltip={GLOSSARY.drawdown}   value={`${isMaxDD.toFixed(1)}%`} />
+            <ISMetricCard label="IS Return"  tooltip={GLOSSARY.inSample}   value={`${isAnnReturn > 0 ? "+" : ""}${isAnnReturn.toFixed(1)}%`} unit="ann." />
+            <ISMetricCard label="IS Months"  value={String(isCurve.length)} />
+            <ISMetricCard label="IS Period"  value={`${isCurve[0]?.date ?? "—"}`} unit="start" />
+            <ISMetricCard label="Backtest"   tooltip={GLOSSARY.inSample}   value={s.backtestSharpe.toFixed(2)} unit="Sharpe" />
           </div>
         </div>
       </section>
@@ -586,9 +610,9 @@ export default async function StrategyPage({ params }: Props) {
             <h2 className="text-sm font-semibold text-text-primary">Capacity &amp; Turnover</h2>
           </div>
           <div className="px-5 divide-y divide-border">
-            <RiskRow label="Estimated capacity"      value={`$${s.capacityUSDM.toFixed(1)}M`} color="neutral" />
-            <RiskRow label="Daily turnover"          value={`${s.turnoverPerDay.toFixed(2)}×`} sub="per day" />
-            <RiskRow label="Capacity check"          value={s.checks.capacityTest.toUpperCase()} color={s.checks.capacityTest === "pass" ? "positive" : s.checks.capacityTest === "warn" ? "neutral" : "negative"} />
+            <RiskRow label="Estimated capacity" tooltip={GLOSSARY.capacity}  value={`$${s.capacityUSDM.toFixed(1)}M`} color="neutral" />
+            <RiskRow label="Daily turnover"     tooltip={GLOSSARY.turnover}  value={`${s.turnoverPerDay.toFixed(2)}×`} sub="per day" />
+            <RiskRow label="Capacity check"     value={s.checks.capacityTest.toUpperCase()} color={s.checks.capacityTest === "pass" ? "positive" : s.checks.capacityTest === "warn" ? "neutral" : "negative"} />
           </div>
         </div>
 
@@ -599,6 +623,7 @@ export default async function StrategyPage({ params }: Props) {
           <div className="px-5 divide-y divide-border">
             <RiskRow
               label="Correlation to book"
+              tooltip={GLOSSARY.correlationToBook}
               value={s.correlationToBook.toFixed(2)}
               color={Math.abs(s.correlationToBook) <= 0.20 ? "positive" : Math.abs(s.correlationToBook) >= 0.50 ? "negative" : "neutral"}
             />
@@ -607,7 +632,7 @@ export default async function StrategyPage({ params }: Props) {
               value={s.betaToNifty.toFixed(2)}
               color={Math.abs(s.betaToNifty) <= 0.15 ? "positive" : "neutral"}
             />
-            <RiskRow label="Max drawdown (full)" value={`${s.maxDrawdownPct.toFixed(1)}%`} color="negative" />
+            <RiskRow label="Max drawdown (full)" tooltip={GLOSSARY.drawdown} value={`${s.maxDrawdownPct.toFixed(1)}%`} color="negative" />
           </div>
         </div>
       </section>
@@ -624,10 +649,17 @@ export default async function StrategyPage({ params }: Props) {
         </div>
         <p className="text-sm text-text-secondary leading-[1.85] max-w-3xl">{summary}</p>
         <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-border">
-          <CheckBadge status={s.checks.overfitting}  label="Overfitting" />
-          <CheckBadge status={s.checks.dataLeakage}  label="Data Leakage" />
-          <CheckBadge status={s.checks.walkForward}  label="Walk-forward" />
-          <CheckBadge status={s.checks.capacityTest} label="Capacity" />
+          {([
+            { status: s.checks.overfitting,  label: "Overfitting",  tooltip: GLOSSARY.overfitting  },
+            { status: s.checks.dataLeakage,  label: "Data Leakage", tooltip: GLOSSARY.dataLeakage  },
+            { status: s.checks.walkForward,  label: "Walk-forward", tooltip: GLOSSARY.walkForward  },
+            { status: s.checks.capacityTest, label: "Capacity",     tooltip: GLOSSARY.capacity     },
+          ] as { status: "pass" | "warn" | "fail"; label: string; tooltip: string }[]).map(({ status, label, tooltip }) => (
+            <span key={label} className="inline-flex items-center gap-1.5">
+              <CheckBadge status={status} />
+              <MetricLabel label={label} tooltip={tooltip} labelClassName="text-xs text-text-secondary" />
+            </span>
+          ))}
         </div>
       </section>
 

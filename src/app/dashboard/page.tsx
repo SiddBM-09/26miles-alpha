@@ -2,16 +2,21 @@ import Link from "next/link";
 import { ArrowUpRight, MapPin, Calendar, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { RESEARCHERS } from "@/lib/mock/researchers";
 import { STRATEGIES }  from "@/lib/mock/strategies";
-import { EARNINGS }    from "@/lib/mock/earnings";
+import { getEarnings } from "@/lib/mock/earnings";
 import { PageContainer } from "@/components/AppShell";
 import { MetricCard }    from "@/components/ui/MetricCard";
-import { LifecycleBadge, CheckBadge } from "@/components/ui/StatusBadge";
+import { MetricLabel }   from "@/components/ui/MetricLabel";
+import { LifecycleBadge } from "@/components/ui/StatusBadge";
+import { GLOSSARY } from "@/lib/glossary";
 import { SectionHeading, SectionDivider } from "@/components/ui/SectionHeading";
 import { EarningsChart, type EarningsChartPoint } from "@/components/dashboard/EarningsChart";
 import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mock session — hardcoded to r01 for prototype
+// Mock session — hardcoded to r01 for prototype.
+// All earnings, payouts, and allocated capital on this page are scoped
+// exclusively to this researcher ID. No other researcher's monetary data
+// is imported or rendered.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MOCK_USER_ID = "r01";
@@ -98,9 +103,11 @@ function HWMStatusCard({
       above ? "hover:border-profit/20" : "hover:border-loss/20"
     )}>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-text-secondary uppercase tracking-wider font-medium">
-          HWM Status
-        </span>
+        <MetricLabel
+          label="HWM Status"
+          tooltip={GLOSSARY.hwm}
+          labelClassName="text-xs text-text-secondary uppercase tracking-wider font-medium"
+        />
         {above
           ? <TrendingUp  className="h-3.5 w-3.5 text-profit" strokeWidth={2} />
           : <TrendingDown className="h-3.5 w-3.5 text-loss"  strokeWidth={2} />
@@ -139,8 +146,18 @@ function StrategyTable({ rows }: { rows: StrategyRow[] }) {
     <div className="border border-border rounded-xl overflow-hidden">
       {/* Header */}
       <div className="hidden sm:grid sm:grid-cols-[1fr_8rem_6rem_8rem_8rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
-        {["Strategy", "State", "OOS Sharpe", "Allocated", "This month"].map((h) => (
-          <span key={h} className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">{h}</span>
+        {([
+          { h: "Strategy",  tooltip: undefined },
+          { h: "State",     tooltip: GLOSSARY.lifecycleState },
+          { h: "OOS Sharpe",tooltip: GLOSSARY.sharpeRatio },
+          { h: "Allocated", tooltip: undefined },
+          { h: "This month",tooltip: undefined },
+        ] as { h: string; tooltip?: string }[]).map(({ h, tooltip }) => (
+          <span key={h} className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
+            {tooltip
+              ? <MetricLabel label={h} tooltip={tooltip} labelClassName="text-2xs font-mono text-text-tertiary uppercase tracking-wider" />
+              : h}
+          </span>
         ))}
       </div>
 
@@ -232,7 +249,9 @@ function StrategyTable({ rows }: { rows: StrategyRow[] }) {
 
 export default function DashboardPage() {
   const researcher = RESEARCHERS.find((r) => r.id === MOCK_USER_ID)!;
-  const earnings   = EARNINGS.find((e) => e.researcherId === MOCK_USER_ID)!;
+  // getEarnings scopes to the session user's record only — never returns
+  // another researcher's payouts, allocated capital, or earnings.
+  const earnings   = getEarnings(MOCK_USER_ID)!;
   const stratRows  = buildStrategyRows(MOCK_USER_ID, earnings.allocatedAUM_INR);
 
   // This month = last payout entry

@@ -5,15 +5,24 @@ import Link from "next/link";
 import { ChevronUp, ChevronDown, ChevronsUpDown, Info, ArrowUpRight } from "lucide-react";
 import { RESEARCHERS, type ResearcherLevel } from "@/lib/mock/researchers";
 import { STRATEGIES } from "@/lib/mock/strategies";
-import { EARNINGS } from "@/lib/mock/earnings";
 import { PageContainer } from "@/components/AppShell";
+import { MetricLabel } from "@/components/ui/MetricLabel";
+import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mock session — r01 is the logged-in user.
+// Only this researcher's row is clickable; others are display-only.
+// No other researcher's earnings, payouts, or allocated capital are shown.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MOCK_USER_ID = "r01";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type SortKey = "alphaScore" | "liveCount" | "perfFeesTotal" | "joinedDate";
+type SortKey = "alphaScore" | "liveCount" | "bestOosSharp" | "joinedDate";
 type SortDir = "asc" | "desc";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,7 +43,6 @@ function alphaHistory(currentScore: number, seed: number, n = 12): number[] {
   const pts = [currentScore];
   for (let i = 1; i < n; i++) {
     const prev = pts[0];
-    // Walk backward: mostly lower scores in the past (slight upward trend)
     const delta = (rand() - 0.54) * 5;
     pts.unshift(Math.max(20, Math.min(99.5, prev - delta)));
   }
@@ -53,17 +61,16 @@ interface LeaderboardRow {
   joinedDate: string;
   liveCount: number;
   totalStrategies: number;
-  perfFeesTotal: number;  // sum of all performanceFee from last-12-mo payouts (INR)
-  allocatedAUM: number;   // INR
+  bestOosSharp: number; // best OOS Sharpe among live strategies; 0 if none
 }
 
 const ROWS: LeaderboardRow[] = RESEARCHERS.map((r, idx) => {
-  const earnings = EARNINGS.find((e) => e.researcherId === r.id);
-  const liveCount = STRATEGIES.filter(
+  const liveStrategies = STRATEGIES.filter(
     (s) => s.ownerId === r.id && s.lifecycleState === "live"
-  ).length;
-  const perfFeesTotal = earnings
-    ? earnings.monthlyPayouts.reduce((sum, p) => sum + p.performanceFee, 0)
+  );
+  const liveCount = liveStrategies.length;
+  const bestOosSharp = liveStrategies.length > 0
+    ? Math.max(...liveStrategies.map((s) => s.oosSharp))
     : 0;
 
   return {
@@ -78,29 +85,9 @@ const ROWS: LeaderboardRow[] = RESEARCHERS.map((r, idx) => {
     joinedDate: r.joinedDate,
     liveCount,
     totalStrategies: r.totalStrategies,
-    perfFeesTotal,
-    allocatedAUM: earnings?.allocatedAUM_INR ?? 0,
+    bestOosSharp,
   };
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Formatters
-// ─────────────────────────────────────────────────────────────────────────────
-
-function fmtINR(n: number): string {
-  if (n === 0) return "—";
-  if (n >= 1_00_00_000) return `₹${(n / 1_00_00_000).toFixed(1)}Cr`;
-  if (n >= 1_00_000)    return `₹${(n / 1_00_000).toFixed(1)}L`;
-  if (n >= 1_000)       return `₹${(n / 1_000).toFixed(0)}K`;
-  return `₹${n}`;
-}
-
-function fmtAUM(n: number): string {
-  if (n === 0) return "—";
-  if (n >= 1_00_00_000) return `₹${(n / 1_00_00_000).toFixed(1)}Cr`;
-  if (n >= 1_00_000)    return `₹${(n / 1_00_000).toFixed(0)}L`;
-  return "—";
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-components
@@ -139,7 +126,6 @@ function Sparkline({ values, className }: { values: number[]; className?: string
 
   const trend = values[values.length - 1] >= values[0];
 
-  // Fill polygon: close down to baseline
   const last  = pts[pts.length - 1].split(",");
   const first = pts[0].split(",");
   const fill  = `M ${pts.join(" L ")} L ${last[0]},${H} L ${first[0]},${H} Z`;
@@ -162,7 +148,6 @@ function Sparkline({ values, className }: { values: number[]; className?: string
         strokeLinecap="round"
         stroke={trend ? "#10b981" : "#ef4444"}
       />
-      {/* Terminal dot */}
       <circle
         cx={parseFloat(last[0])}
         cy={parseFloat(last[1])}
@@ -195,9 +180,9 @@ function AlphaBar({ score }: { score: number }) {
 }
 
 const RANK_MEDAL: Record<number, string> = {
-  1: "text-warn font-bold",        // gold
-  2: "text-text-secondary font-bold", // silver
-  3: "text-[#cd7f32] font-bold",   // bronze
+  1: "text-warn font-bold",
+  2: "text-text-secondary font-bold",
+  3: "text-[#cd7f32] font-bold",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,7 +190,7 @@ const RANK_MEDAL: Record<number, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SortButton({
-  col, label, current, dir, onSort, className,
+  col, label, current, dir, onSort, className, tooltip,
 }: {
   col: SortKey;
   label: string;
@@ -213,9 +198,14 @@ function SortButton({
   dir: SortDir;
   onSort: (k: SortKey) => void;
   className?: string;
+  tooltip?: string;
 }) {
   const active = current === col;
   const Icon = active ? (dir === "desc" ? ChevronDown : ChevronUp) : ChevronsUpDown;
+  const labelCls = cn(
+    "text-2xs font-mono uppercase tracking-wider",
+    active ? "text-accent" : "text-text-tertiary"
+  );
   return (
     <button
       onClick={() => onSort(col)}
@@ -226,9 +216,39 @@ function SortButton({
       )}
       aria-sort={active ? (dir === "desc" ? "descending" : "ascending") : "none"}
     >
-      {label}
+      {tooltip
+        ? <MetricLabel label={label} tooltip={tooltip} labelClassName={labelCls} />
+        : label}
       <Icon className={cn("h-3 w-3 flex-shrink-0", active ? "text-accent" : "text-text-tertiary group-hover:text-text-secondary")} />
     </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Row wrapper — own row is a link; others are non-interactive display only
+// ─────────────────────────────────────────────────────────────────────────────
+
+function RowWrapper({
+  isOwn,
+  children,
+}: {
+  isOwn: boolean;
+  children: React.ReactNode;
+}) {
+  if (isOwn) {
+    return (
+      <Link
+        href="/dashboard"
+        className="group block border-b border-border last:border-b-0 hover:bg-elevated/60 transition-colors"
+      >
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <div className="border-b border-border last:border-b-0">
+      {children}
+    </div>
   );
 }
 
@@ -252,15 +272,15 @@ export default function LeaderboardPage() {
   const sorted = useMemo(() => {
     return [...ROWS].sort((a, b) => {
       const mul = sortDir === "desc" ? -1 : 1;
-      if (sortKey === "alphaScore")    return mul * (a.alphaScore - b.alphaScore);
-      if (sortKey === "liveCount")     return mul * (a.liveCount - b.liveCount);
-      if (sortKey === "perfFeesTotal") return mul * (a.perfFeesTotal - b.perfFeesTotal);
-      if (sortKey === "joinedDate")    return mul * a.joinedDate.localeCompare(b.joinedDate);
+      if (sortKey === "alphaScore")   return mul * (a.alphaScore - b.alphaScore);
+      if (sortKey === "liveCount")    return mul * (a.liveCount - b.liveCount);
+      if (sortKey === "bestOosSharp") return mul * (a.bestOosSharp - b.bestOosSharp);
+      if (sortKey === "joinedDate")   return mul * a.joinedDate.localeCompare(b.joinedDate);
       return 0;
     });
   }, [sortKey, sortDir]);
 
-  // Pre-compute default rank (by alpha score desc) for stable medal assignment
+  // Stable medal rank always by alpha score desc
   const defaultRank = useMemo(() => {
     const byScore = [...ROWS].sort((a, b) => b.alphaScore - a.alphaScore);
     return Object.fromEntries(byScore.map((r, i) => [r.id, i + 1]));
@@ -283,9 +303,9 @@ export default function LeaderboardPage() {
         {/* Mobile sort selector */}
         <div className="flex sm:hidden items-center gap-2">
           <span className="text-xs text-text-tertiary font-mono">Sort:</span>
-          {(["alphaScore", "liveCount", "perfFeesTotal"] as SortKey[]).map((k) => {
+          {(["alphaScore", "liveCount", "bestOosSharp"] as SortKey[]).map((k) => {
             const labels: Record<string, string> = {
-              alphaScore: "Alpha", liveCount: "Live", perfFeesTotal: "Earnings",
+              alphaScore: "Alpha", liveCount: "Live", bestOosSharp: "OOS Sharpe",
             };
             return (
               <button
@@ -321,14 +341,16 @@ export default function LeaderboardPage() {
       <div className="border border-border rounded-xl overflow-hidden">
 
         {/* Desktop header */}
-        <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem_6.5rem] gap-x-4 items-center px-5 py-3 bg-elevated border-b border-border">
+        <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-3 bg-elevated border-b border-border">
           <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">#</span>
 
           <SortButton col="alphaScore" label="Researcher" current={sortKey} dir={sortDir} onSort={handleSort} />
 
-          <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">Level</span>
+          <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
+            <MetricLabel label="Level" tooltip={GLOSSARY.lifecycleState} labelClassName="text-2xs font-mono text-text-tertiary uppercase tracking-wider" />
+          </span>
 
-          <SortButton col="alphaScore" label="Alpha Score" current={sortKey} dir={sortDir} onSort={handleSort} />
+          <SortButton col="alphaScore" label="Alpha Score" tooltip={GLOSSARY.alphaScore} current={sortKey} dir={sortDir} onSort={handleSort} />
 
           <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
             12-mo trend
@@ -336,21 +358,20 @@ export default function LeaderboardPage() {
 
           <SortButton col="liveCount" label="Live" current={sortKey} dir={sortDir} onSort={handleSort} />
 
-          <SortButton col="perfFeesTotal" label="Perf fees" current={sortKey} dir={sortDir} onSort={handleSort} />
-
-          <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">AUM alloc.</span>
+          <SortButton col="bestOosSharp" label="OOS Sharpe" tooltip={GLOSSARY.sharpeRatio} current={sortKey} dir={sortDir} onSort={handleSort} />
         </div>
 
         {sorted.map((row, i) => {
-          const rank = defaultRank[row.id];
-          const isTopThree = rank <= 3;
+          const rank  = defaultRank[row.id];
+          const isOwn = row.id === MOCK_USER_ID;
+
+          const sharpeColor =
+            row.bestOosSharp >= 1.5 ? "text-profit" :
+            row.bestOosSharp >= 1.0 ? "text-text-primary" :
+            row.bestOosSharp >  0   ? "text-warn" : "text-text-tertiary";
 
           return (
-            <Link
-              key={row.id}
-              href={`/dashboard`}   // links to researcher dashboard once built
-              className="group block border-b border-border last:border-b-0 hover:bg-elevated/60 transition-colors"
-            >
+            <RowWrapper key={row.id} isOwn={isOwn}>
               {/* ── Mobile layout ── */}
               <div className="md:hidden px-4 py-4">
                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -363,9 +384,15 @@ export default function LeaderboardPage() {
                     </span>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">
+                        <span className={cn(
+                          "text-sm font-medium transition-colors",
+                          isOwn ? "text-text-primary group-hover:text-accent" : "text-text-primary"
+                        )}>
                           @{row.handle}
                         </span>
+                        {isOwn && (
+                          <span className="text-2xs font-mono text-accent border border-accent/20 rounded px-1 py-0.5">you</span>
+                        )}
                         <LevelBadge level={row.level} />
                       </div>
                       <p className="text-xs text-text-tertiary mt-0.5">{row.city}</p>
@@ -378,16 +405,16 @@ export default function LeaderboardPage() {
                   <span className="text-xs text-text-secondary font-mono">
                     {row.liveCount} live
                   </span>
-                  {row.perfFeesTotal > 0 && (
-                    <span className="text-xs text-profit font-mono tabular-nums">
-                      {fmtINR(row.perfFeesTotal)}
+                  {row.bestOosSharp > 0 && (
+                    <span className={cn("text-xs font-mono tabular-nums", sharpeColor)}>
+                      SR {row.bestOosSharp.toFixed(2)}
                     </span>
                   )}
                 </div>
               </div>
 
               {/* ── Desktop layout ── */}
-              <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem_6.5rem] gap-x-4 items-center px-5 py-3.5">
+              <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-3.5">
 
                 {/* Rank */}
                 <span className={cn(
@@ -400,10 +427,18 @@ export default function LeaderboardPage() {
                 {/* Researcher */}
                 <div className="min-w-0 flex flex-col gap-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors truncate">
+                    <span className={cn(
+                      "text-sm font-medium truncate transition-colors",
+                      isOwn ? "text-text-primary group-hover:text-accent" : "text-text-primary"
+                    )}>
                       @{row.handle}
                     </span>
-                    <ArrowUpRight className="h-3 w-3 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    {isOwn && (
+                      <span className="text-2xs font-mono text-accent border border-accent/20 rounded px-1 py-0.5 flex-shrink-0">you</span>
+                    )}
+                    {isOwn && (
+                      <ArrowUpRight className="h-3 w-3 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    )}
                   </div>
                   <span className="text-2xs text-text-tertiary truncate">
                     {row.displayName} · {row.city}
@@ -434,38 +469,24 @@ export default function LeaderboardPage() {
                   </span>
                 </div>
 
-                {/* Perf fees (12 mo) */}
-                <span className={cn(
-                  "font-mono text-sm tabular-nums",
-                  row.perfFeesTotal > 0 ? "text-profit" : "text-text-tertiary"
-                )}>
-                  {fmtINR(row.perfFeesTotal)}
+                {/* Best OOS Sharpe (live strategies only) */}
+                <span className={cn("font-mono text-sm tabular-nums", sharpeColor)}>
+                  {row.bestOosSharp > 0 ? row.bestOosSharp.toFixed(2) : "—"}
                 </span>
 
-                {/* AUM allocated */}
-                <span className={cn(
-                  "font-mono text-sm tabular-nums",
-                  row.allocatedAUM > 0 ? "text-text-primary" : "text-text-tertiary"
-                )}>
-                  {fmtAUM(row.allocatedAUM)}
-                </span>
               </div>
-            </Link>
+            </RowWrapper>
           );
         })}
       </div>
 
       {/* Footer note */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-        <p className="text-2xs text-text-tertiary font-mono leading-relaxed max-w-xl">
-          Alpha Score is a composite of OOS Sharpe ratio, walk-forward stability score, max drawdown
-          management, and live AUM deployed. Backtest metrics carry zero weight.
-          Scores update nightly after market close.
-        </p>
-        <p className="text-2xs text-text-tertiary font-mono whitespace-nowrap">
-          Perf fees shown: trailing 12 months
-        </p>
-      </div>
+      <p className="text-2xs text-text-tertiary font-mono leading-relaxed max-w-xl">
+        Alpha Score is a composite of OOS Sharpe ratio, walk-forward stability score, max drawdown
+        management, and live strategies deployed. Backtest metrics carry zero weight.
+        OOS Sharpe shown: best live strategy (annualised, RF = 6%). Scores update nightly after market close.
+      </p>
+
     </PageContainer>
   );
 }

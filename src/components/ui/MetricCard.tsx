@@ -1,10 +1,13 @@
 import { cn, fmtPct } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { MetricLabel } from "@/components/ui/MetricLabel";
 
 export type MetricTrend = "up" | "down" | "neutral";
 
 interface MetricCardProps {
   label: string;
+  /** Hover tooltip definition shown via MetricLabel ⓘ icon */
+  tooltip?: string;
   value: string | number;
   unit?: string;
   subValue?: string;
@@ -30,6 +33,7 @@ const TREND_COLOR: Record<MetricTrend, string> = {
 
 export function MetricCard({
   label,
+  tooltip,
   value,
   unit,
   subValue,
@@ -60,9 +64,17 @@ export function MetricCard({
     >
       {/* Label row */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-text-secondary uppercase tracking-wider font-medium">
-          {label}
-        </span>
+        {tooltip ? (
+          <MetricLabel
+            label={label}
+            tooltip={tooltip}
+            labelClassName="text-xs text-text-secondary uppercase tracking-wider font-medium"
+          />
+        ) : (
+          <span className="text-xs text-text-secondary uppercase tracking-wider font-medium">
+            {label}
+          </span>
+        )}
         {TrendIcon && (
           <TrendIcon className={cn("h-3.5 w-3.5", trendColor)} strokeWidth={2} />
         )}
