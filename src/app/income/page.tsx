@@ -642,7 +642,7 @@ export default function IncomePage() {
             <Link
               href="/submit"
               className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-semibold
-                         bg-accent hover:bg-accent/90 text-white transition-colors shadow-glow whitespace-nowrap"
+                         bg-accent hover:bg-accent/90 text-canvas transition-colors whitespace-nowrap"
             >
               Submit a Strategy
               <ArrowRight className="h-4 w-4" />

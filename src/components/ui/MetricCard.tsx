@@ -45,9 +45,9 @@ export function MetricCard({
   if (loading) {
     return (
       <div className={cn("card p-4 flex flex-col gap-2", className)}>
-        <div className="h-3 w-24 rounded bg-muted animate-shimmer" />
-        <div className="h-7 w-16 rounded bg-muted animate-shimmer" />
-        <div className="h-2.5 w-20 rounded bg-muted animate-shimmer" />
+        <div className="h-2.5 w-20 rounded-sm bg-elevated animate-shimmer" />
+        <div className="h-6 w-14 rounded-sm bg-elevated animate-shimmer" />
+        <div className="h-2 w-16 rounded-sm bg-elevated animate-shimmer" />
       </div>
     );
   }
@@ -58,7 +58,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "card p-4 flex flex-col gap-1 transition-shadow hover:shadow-card-hover hover:border-accent/20",
+        "card p-4 flex flex-col gap-1 transition-colors hover:border-accent/20",
         className
       )}
     >

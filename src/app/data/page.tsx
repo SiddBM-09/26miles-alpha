@@ -774,7 +774,7 @@ function DatasetDetail({
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={onSandbox}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-white px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
@@ -845,7 +845,7 @@ export default function DataPage() {
         </div>
         <button
           onClick={openSandbox}
-          className="flex-shrink-0 inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-white px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
+          className="flex-shrink-0 inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
@@ -895,7 +895,7 @@ export default function DataPage() {
               </span>
               {showFilters ? "Hide filters" : "Filters"}
               {(assetFilter !== "All" || tierFilter !== "All") && (
-                <span className="ml-1 h-4 w-4 rounded-full bg-accent text-white text-2xs flex items-center justify-center">
+                <span className="ml-1 h-4 w-4 rounded-full bg-accent text-canvas text-2xs flex items-center justify-center">
                   {(assetFilter !== "All" ? 1 : 0) + (tierFilter !== "All" ? 1 : 0)}
                 </span>
               )}

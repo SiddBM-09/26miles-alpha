@@ -70,7 +70,7 @@ function TopNav() {
               >
                 {label}
                 {active && (
-                  <span className="absolute bottom-0 left-3 right-3 h-px bg-accent rounded-full" />
+                  <span className="absolute bottom-0 left-3 right-3 h-px bg-accent" />
                 )}
               </Link>
             );
@@ -103,7 +103,7 @@ function TopNav() {
               </Link>
               <Link
                 href="/submit"
-                className="hidden sm:inline-flex items-center rounded px-3 py-1.5 text-sm font-medium bg-accent hover:bg-accent/90 text-white transition-colors shadow-sm"
+                className="hidden sm:inline-flex items-center rounded px-3 py-1.5 text-sm font-semibold bg-accent hover:bg-accent/90 text-canvas transition-colors"
               >
                 Submit Strategy
               </Link>

@@ -83,7 +83,7 @@ function LoginForm() {
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5 mb-10 group">
-        <span className="flex h-8 w-8 items-center justify-center rounded bg-accent text-sm font-bold text-white select-none">
+        <span className="flex h-8 w-8 items-center justify-center rounded bg-accent text-sm font-bold text-canvas select-none">
           26
         </span>
         <span className="text-lg font-semibold tracking-tight text-text-primary group-hover:text-accent transition-colors">
@@ -201,8 +201,8 @@ function LoginForm() {
             className={cn(
               "w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
               loading
-                ? "bg-accent/60 text-white/70 cursor-not-allowed"
-                : "bg-accent hover:bg-accent/90 text-white"
+                ? "bg-accent/40 text-canvas/50 cursor-not-allowed"
+                : "bg-accent hover:bg-accent/90 text-canvas"
             )}
           >
             {loading ? (

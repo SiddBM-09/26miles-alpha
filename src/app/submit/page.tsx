@@ -633,7 +633,7 @@ function AIStrategyMaker({ form, update }: {
           className={cn(
             "inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-semibold transition-colors",
             canGenerate && !generating
-              ? "bg-accent hover:bg-accent/90 text-white shadow-glow"
+              ? "bg-accent hover:bg-accent/90 text-canvas"
               : "bg-muted text-text-tertiary cursor-not-allowed"
           )}
         >
@@ -1238,7 +1238,7 @@ function ConfirmationScreen({ conf, strategyName }: { conf: Confirmation; strate
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium bg-accent hover:bg-accent/90 text-white transition-colors">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium bg-accent hover:bg-accent/90 text-canvas transition-colors">
           Go to dashboard <ArrowRight className="h-4 w-4" />
         </Link>
         <Link href="/leaderboard" className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary transition-colors">
@@ -1271,8 +1271,8 @@ function StepBar({ current }: { current: number }) {
               <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                 <div className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
-                  done   ? "bg-profit border-profit text-white" :
-                  active ? "bg-accent border-accent text-white" :
+                  done   ? "bg-profit border-profit text-canvas" :
+                  active ? "bg-accent border-accent text-canvas" :
                            "bg-surface border-border text-text-tertiary"
                 )}>
                   {done ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : n}
@@ -1352,7 +1352,7 @@ function NavBar({ step, form, onBack, onNext, onSubmit, submitting }: {
             disabled={!ok}
             className={cn(
               "inline-flex items-center gap-1.5 rounded px-5 py-2 text-sm font-medium transition-colors",
-              ok ? "bg-accent hover:bg-accent/90 text-white" : "bg-muted text-text-tertiary cursor-not-allowed"
+              ok ? "bg-accent hover:bg-accent/90 text-canvas" : "bg-muted text-text-tertiary cursor-not-allowed"
             )}
           >
             Continue <ChevronRight className="h-4 w-4" />
@@ -1361,7 +1361,7 @@ function NavBar({ step, form, onBack, onNext, onSubmit, submitting }: {
           <button
             onClick={onSubmit}
             disabled={submitting}
-            className="inline-flex items-center gap-1.5 rounded px-5 py-2 text-sm font-semibold bg-accent hover:bg-accent/90 text-white transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded px-5 py-2 text-sm font-semibold bg-accent hover:bg-accent/90 text-canvas transition-colors disabled:opacity-60"
           >
             {submitting ? (
               <><span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Submitting…</>

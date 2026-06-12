@@ -2,10 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Fonts ────────────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
     --font-inter: "Inter", sans-serif;
-    --font-geist-mono: "GeistMono", "JetBrains Mono", "Fira Code", monospace;
+    --font-mono:  "JetBrains Mono", "Geist Mono", ui-monospace, monospace;
   }
 
   * {
@@ -15,64 +17,118 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Tabular figures by default — numerals align in tables/charts */
+    font-feature-settings: "tnum" 0, "liga" 0, "cv02", "cv03", "cv04";
   }
 
   body {
-    @apply bg-canvas text-text-primary font-sans text-base;
-    background-color: #0a0b0d;
-    color: #e8eaf0;
+    @apply bg-canvas text-text-primary font-sans;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
-  /* Tabular numerals everywhere inside mono font spans */
+  /* Every monospace element gets tabular numerals and slashed zero */
   .font-mono,
+  code,
+  pre,
   [data-tabular] {
+    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
+    font-feature-settings: "tnum" 1, "zero" 1;
+    -webkit-font-smoothing: auto;
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #111318;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2a3042;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #3b4256;
-  }
+  /* Scrollbar — thin, subtle, lime on hover */
+  ::-webkit-scrollbar             { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track       { background: #0A0B0D; }
+  ::-webkit-scrollbar-thumb       { background: rgba(255,255,255,0.10); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(170,255,62,0.35); }
 
-  /* Selection */
+  /* Selection — lime tint */
   ::selection {
-    background: rgba(59, 130, 246, 0.3);
-    color: #e8eaf0;
+    background: rgba(170, 255, 62, 0.15);
+    color: #E6E8EB;
   }
+
+  /* Headings — tight tracking, no extra margin */
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #E6E8EB;
+  }
+
+  /* Links inside body text — no default underline */
+  a { text-decoration: none; }
 }
 
-@layer utilities {
-  /* Metric number — tabular mono, primary color */
-  .metric-value {
-    @apply font-mono text-text-primary font-medium tabular-nums;
-    font-feature-settings: "tnum";
+/* ── Component layer — reusable classes ──────────────────────────────────── */
+
+@layer components {
+
+  /* ── Card — hairline border, no shadow ── */
+  .card {
+    @apply bg-surface rounded-lg border border-border;
   }
 
-  /* Subtle separator line */
+  /* ── Micro-label — terminal section headers ── */
+  /* Usage: <p className="label-caps">Section title</p> */
+  .label-caps {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;          /* 10px */
+    line-height: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #4D5562;               /* text-tertiary */
+    font-weight: 500;
+  }
+
+  .label-caps-accent {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #AAFF3E;               /* accent */
+    font-weight: 500;
+  }
+
+  /* ── Table header cell ── */
+  .th {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: #4D5562;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── Primary button — accent bg, dark text ── */
+  /* IMPORTANT: text must be dark (text-canvas) on the lime accent */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded px-4 py-2 text-sm font-semibold
+           bg-accent text-canvas hover:bg-accent/90 transition-colors whitespace-nowrap;
+  }
+
+  /* ── Ghost button — hairline border ── */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded px-4 py-2 text-sm font-medium
+           border border-border text-text-secondary hover:text-text-primary
+           hover:border-[rgba(170,255,62,0.25)] transition-colors whitespace-nowrap bg-transparent;
+  }
+
+  /* ── Divider ── */
   .divider {
     @apply border-t border-border;
   }
 
-  /* Card base */
-  .card {
-    @apply bg-surface rounded-lg border border-border shadow-card;
-  }
-
-  /* Positive / negative color utilities */
+  /* ── Semantic color helpers ── */
   .positive { @apply text-profit; }
-  .negative { @apply text-loss; }
+  .negative { @apply text-loss;   }
   .neutral  { @apply text-text-secondary; }
+
+  /* ── Loading shimmer ── */
+  .shimmer {
+    @apply animate-shimmer bg-elevated rounded;
+  }
 }

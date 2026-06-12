@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Lock, BarChart2, ChevronRight, CheckCircle2, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowRight, Lock, BarChart2, CheckCircle2, TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
 import { STRATEGIES } from "@/lib/mock/strategies";
 import { RESEARCHERS } from "@/lib/mock/researchers";
 import { LifecycleBadge, CheckBadge } from "@/components/ui/StatusBadge";
@@ -17,109 +17,148 @@ const top5 = STRATEGIES
   .slice(0, 5);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hero
+// Hero validation card — the platform's "specimen"
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HeroValidationCard() {
-  return (
-    <div className="relative w-full max-w-sm mx-auto lg:mx-0">
-      {/* Glow behind card */}
-      <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-accent/20 via-transparent to-profit/10 blur-xl opacity-60" />
+  const bars = [62, 71, 68, 80, 76, 84, 79, 90, 88, 96, 92, 100];
 
-      <div className="relative bg-surface border border-border rounded-xl overflow-hidden shadow-card">
-        {/* Card header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <div>
-            <p className="text-xs text-text-tertiary font-mono uppercase tracking-wider">Validation Report</p>
-            <p className="text-sm font-medium text-text-primary mt-0.5">Nifty Vol Surface Arb</p>
+  return (
+    <div className="w-full max-w-sm mx-auto lg:mx-0 font-mono">
+      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+
+        {/* Terminal-style title bar */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-elevated">
+          <div className="flex items-center gap-3">
+            {/* Terminal dots — decorative */}
+            <div className="flex gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-loss/60" />
+              <span className="h-2 w-2 rounded-full bg-warn/60" />
+              <span className="h-2 w-2 rounded-full bg-profit/60" />
+            </div>
+            <span className="text-2xs text-text-tertiary uppercase tracking-widest">
+              validation_report.json
+            </span>
           </div>
           <LifecycleBadge state="live" />
         </div>
 
-        {/* Metric grid */}
-        <div className="grid grid-cols-2 divide-x divide-y divide-border">
+        {/* Strategy name row */}
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-xs text-text-tertiary uppercase tracking-widest mb-0.5">strategy</p>
+          <p className="text-sm font-semibold text-text-primary">Nifty Vol Surface Arb</p>
+        </div>
+
+        {/* Metric grid — 2×2 */}
+        <div className="grid grid-cols-2 border-b border-border">
           {([
-            { label: "OOS Sharpe",   tooltip: GLOSSARY.sharpeRatio, value: "1.84",  sub: "out-of-sample",   up: true  },
-            { label: "Max Drawdown", tooltip: GLOSSARY.drawdown,    value: "−7.3%", sub: "since inception",  up: false },
-            { label: "Capacity",     tooltip: GLOSSARY.capacity,    value: "$8.5M", sub: "est. AUM ceiling", up: null  },
-            { label: "Turnover",     tooltip: GLOSSARY.turnover,    value: "2.1×",  sub: "per day",          up: null  },
-          ] as { label: string; tooltip: string; value: string; sub: string; up: boolean | null }[]).map(({ label, tooltip, value, sub, up }) => (
-            <div key={label} className="px-4 py-3">
-              <MetricLabel label={label} tooltip={tooltip} labelClassName="text-2xs text-text-tertiary uppercase tracking-wider font-mono" />
-              <p className={cn(
-                "font-mono text-lg font-semibold tabular-nums mt-0.5",
-                up === true  ? "text-profit" :
-                up === false ? "text-loss"   : "text-text-primary"
-              )}>
+            { label: "OOS Sharpe",   tooltip: GLOSSARY.sharpeRatio, value: "1.84",  sub: "out-of-sample",  color: "text-profit" },
+            { label: "Max Drawdown", tooltip: GLOSSARY.drawdown,    value: "−7.3%", sub: "since inception", color: "text-loss"   },
+            { label: "Capacity",     tooltip: GLOSSARY.capacity,    value: "$8.5M", sub: "est. AUM ceiling",color: "text-text-primary" },
+            { label: "Turnover",     tooltip: GLOSSARY.turnover,    value: "2.1×",  sub: "per day",         color: "text-text-primary" },
+          ]).map(({ label, tooltip, value, sub, color }, i) => (
+            <div
+              key={label}
+              className={cn(
+                "px-4 py-3",
+                i % 2 === 0 ? "border-r border-border" : "",
+                i < 2      ? "border-b border-border"  : "",
+              )}
+            >
+              <MetricLabel
+                label={label}
+                tooltip={tooltip}
+                labelClassName="text-2xs text-text-tertiary uppercase tracking-wider"
+              />
+              <p className={cn("text-lg font-semibold tabular-nums mt-1 leading-none", color)}>
                 {value}
               </p>
-              <p className="text-2xs text-text-tertiary mt-0.5">{sub}</p>
+              <p className="text-2xs text-text-tertiary mt-1">{sub}</p>
             </div>
           ))}
         </div>
 
         {/* Checks row */}
-        <div className="flex items-center gap-2 px-4 py-3 border-t border-border bg-elevated/40">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-elevated/50">
           <CheckBadge status="pass" label="Overfitting" />
           <CheckBadge status="pass" label="Data Leakage" />
           <CheckBadge status="pass" label="Walk-Forward" />
         </div>
 
-        {/* Tiny equity sparkline bars */}
-        <div className="px-4 pb-4 pt-1">
-          <p className="text-2xs text-text-tertiary font-mono mb-2">Equity curve — last 12 mo (OOS)</p>
-          <div className="flex items-end gap-0.5 h-10">
-            {[62,71,68,80,76,84,79,90,88,96,92,100].map((h, i) => (
+        {/* Equity sparkline */}
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-2xs text-text-tertiary uppercase tracking-wider">Equity curve — OOS, 12 mo</p>
+            <span className="text-2xs text-profit tabular-nums">+18.4% YTD</span>
+          </div>
+          <div className="flex items-end gap-0.5 h-8">
+            {bars.map((h, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-sm bg-accent/30"
+                className="flex-1 bg-accent/25 rounded-sm"
                 style={{ height: `${h}%` }}
               />
             ))}
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-2xs text-text-tertiary font-mono">Jun '25</span>
-            <span className="text-2xs text-profit font-mono">+18.4% YTD</span>
+          <div className="flex justify-between mt-1.5">
+            <span className="text-2xs text-text-tertiary">Jun '25</span>
+            <span className="text-2xs text-text-tertiary">Jun '26</span>
           </div>
         </div>
+
       </div>
     </div>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────────────────────────────────────────
+
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border">
-      {/* Subtle background grid */}
+
+      {/* Hairline grid — terminal/data aesthetic */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage:
-            "linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
+          backgroundImage: [
+            "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)",
+            "linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+          ].join(", "),
+          backgroundSize: "48px 48px",
         }}
       />
-      {/* Radial vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-canvas" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-3xl" />
+
+      {/* Vignette — fades the grid at edges */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-canvas/0 via-canvas/0 to-canvas" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-canvas via-canvas/0 to-canvas" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        <div className="flex flex-col lg:flex-row items-center gap-14 lg:gap-20">
 
           {/* Left — copy */}
           <div className="flex-1 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs text-accent font-mono mb-8">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-              $47.2M AUM live across 9 strategies
+
+            {/* Status ticker — terminal mono label */}
+            <div className="inline-flex items-center gap-2 rounded border border-border bg-elevated px-2.5 py-1 mb-8">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-profit opacity-75 animate-ping" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-profit" />
+              </span>
+              <span className="font-mono text-2xs text-text-secondary uppercase tracking-widest">
+                $47.2M AUM · 9 strategies live
+              </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-text-primary leading-[1.1] mb-5">
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-text-primary leading-[1.08] mb-5">
               Turn your alpha
               <br />
               into income.
             </h1>
 
-            <p className="text-md text-text-secondary leading-relaxed max-w-lg mx-auto lg:mx-0 mb-8">
+            <p className="text-base text-text-secondary leading-relaxed max-w-lg mx-auto lg:mx-0 mb-8">
               Upload a strategy. We validate it with rigorous out-of-sample
               testing, walk-forward analysis, and overfitting checks.
               Strategies that pass get 26 Miles' own capital behind them —
@@ -127,37 +166,31 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-12">
-              <Link
-                href="/submit"
-                className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium bg-accent hover:bg-accent/90 text-white transition-colors shadow-glow"
-              >
+              <Link href="/submit" className="btn-primary">
                 Submit a Strategy
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                href="/leaderboard"
-                className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-medium border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary transition-colors"
-              >
+              <Link href="/leaderboard" className="btn-ghost">
                 View Leaderboard
               </Link>
             </div>
 
-            {/* Proof stats */}
-            <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto lg:mx-0">
+            {/* Proof stats — mono table */}
+            <div className="inline-grid grid-cols-3 gap-px border border-border rounded-lg overflow-hidden bg-border">
               {[
-                { value: "248",  label: "Strategies reviewed" },
-                { value: "1.47", label: "Avg live Sharpe (OOS)" },
-                { value: "₹3.2L",label: "Avg monthly payout" },
+                { value: "248",   label: "Strategies reviewed" },
+                { value: "1.47",  label: "Avg OOS Sharpe" },
+                { value: "₹3.2L", label: "Avg monthly payout" },
               ].map(({ value, label }) => (
-                <div key={label} className="text-center lg:text-left">
-                  <div className="font-mono text-xl font-semibold text-text-primary tabular-nums">{value}</div>
+                <div key={label} className="bg-surface px-4 py-3 text-center lg:text-left">
+                  <div className="font-mono text-lg font-semibold text-text-primary tabular-nums">{value}</div>
                   <div className="text-2xs text-text-tertiary mt-0.5 leading-snug">{label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right — validation card preview */}
+          {/* Right — card */}
           <div className="flex-shrink-0 w-full lg:w-auto">
             <HeroValidationCard />
           </div>
@@ -168,27 +201,27 @@ function Hero() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// How it works
+// How it works — three steps
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STEPS = [
   {
     num: "01",
     title: "Submit your strategy",
-    body: "Upload your signal logic, a backtest, and any supporting code. We timestamp everything on receipt — establishing your IP provenance before any review begins.",
-    detail: "Python / R / Julia accepted · Backtest artefacts · Signal description",
+    body: "Upload your signal logic, a backtest, and supporting code. We timestamp everything on receipt — establishing your IP provenance before any review begins.",
+    detail: "Python · R · Julia · Signal files · AI builder",
   },
   {
     num: "02",
     title: "We validate it",
-    body: "Our quant team runs a battery of OOS tests: walk-forward stability, deflated Sharpe, probability of backtest overfitting, data-leakage audit, and capacity estimation.",
-    detail: "Typically 4–6 weeks · Full written report · Resubmission allowed",
+    body: "Our quant team runs walk-forward stability tests, deflated Sharpe, probability of backtest overfitting, data-leakage audit, and capacity estimation.",
+    detail: "4–6 weeks · Full written report · Resubmission allowed",
   },
   {
     num: "03",
     title: "You earn",
-    body: "Strategies that pass go live with 26 Miles' own capital. You receive a fixed monthly retainer from day one, plus a performance share of live P&L tracked against a transparent high-water mark.",
-    detail: "Monthly payouts · High-water mark tracked · No lock-in",
+    body: "Strategies that pass go live with 26 Miles' own capital. You receive a monthly retainer from day one, plus a performance share tracked against a transparent HWM.",
+    detail: "Monthly payouts · HWM tracked · No lock-in",
   },
 ];
 
@@ -196,82 +229,82 @@ function HowItWorks() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <div className="max-w-xl mb-12">
-          <p className="text-xs font-mono text-accent uppercase tracking-widest mb-3">How it works</p>
+
+        <div className="mb-12">
+          <p className="label-caps-accent mb-3">Process</p>
           <h2 className="text-2xl sm:text-3xl font-semibold text-text-primary tracking-tight">
             From signal to income in three steps.
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-border rounded-xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-border rounded-lg overflow-hidden border border-border">
           {STEPS.map(({ num, title, body, detail }, i) => (
             <div
               key={num}
-              className={cn(
-                "relative p-8 flex flex-col gap-4",
-                i < STEPS.length - 1 && "border-b lg:border-b-0 lg:border-r border-border"
-              )}
+              className="relative bg-surface p-8 flex flex-col gap-4"
             >
-              {/* Connector arrow on desktop */}
+              {/* Step connector on desktop */}
               {i < STEPS.length - 1 && (
-                <div className="hidden lg:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 h-6 w-6 items-center justify-center rounded-full bg-elevated border border-border">
+                <div className="hidden lg:flex absolute top-8 -right-3 z-10 h-5 w-5 items-center justify-center rounded bg-elevated border border-border">
                   <ChevronRight className="h-3 w-3 text-text-tertiary" />
                 </div>
               )}
 
+              {/* Number + rule */}
               <div className="flex items-center gap-3">
-                <span className="font-mono text-3xl font-semibold text-border select-none">{num}</span>
+                <span className="font-mono text-2xl font-semibold text-accent tabular-nums">{num}</span>
                 <div className="h-px flex-1 bg-border" />
               </div>
 
-              <h3 className="text-base font-semibold text-text-primary">{title}</h3>
+              <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
               <p className="text-sm text-text-secondary leading-relaxed flex-1">{body}</p>
 
-              <p className="text-2xs font-mono text-text-tertiary pt-2 border-t border-border/60 leading-relaxed">
+              <p className="font-mono text-2xs text-text-tertiary pt-3 border-t border-border leading-relaxed">
                 {detail}
               </p>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Trust: IP protection + transparent payouts
+// IP + Payouts — two-column trust section
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TrustSection() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-border rounded-lg overflow-hidden border border-border">
 
           {/* IP Protection */}
-          <div className="bg-surface border border-border rounded-xl p-8 flex flex-col gap-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 border border-accent/20">
-              <Lock className="h-5 w-5 text-accent" />
+          <div className="bg-surface p-8 flex flex-col gap-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-elevated border border-border">
+                <Lock className="h-4 w-4 text-accent" />
+              </div>
+              <h3 className="text-base font-semibold text-text-primary">Your IP stays yours.</h3>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">Your IP stays yours.</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                You retain full ownership of every strategy you submit.
-                We never redistribute your code, signals, or methodology to
-                third parties. Submission is timestamp-anchored — the
-                receipt hash establishes provenance before any reviewer
-                sees your work.
-              </p>
-            </div>
-            <ul className="space-y-2.5">
+            <p className="text-sm text-text-secondary leading-relaxed">
+              You retain full ownership of every strategy you submit.
+              We never redistribute your code, signals, or methodology to
+              third parties. Submission is timestamp-anchored — the
+              receipt hash establishes provenance before any reviewer
+              sees your work.
+            </p>
+            <ul className="space-y-2">
               {[
                 "Encrypted at rest and in transit",
                 "Timestamped receipt on every submission",
                 "NDA-backed review process",
-                "You can withdraw at any time",
+                "Withdraw at any time",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5 text-sm text-text-secondary">
-                  <CheckCircle2 className="h-4 w-4 text-profit flex-shrink-0" strokeWidth={2} />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-profit flex-shrink-0" strokeWidth={2} />
                   {item}
                 </li>
               ))}
@@ -279,43 +312,44 @@ function TrustSection() {
           </div>
 
           {/* Transparent payouts */}
-          <div className="bg-surface border border-border rounded-xl p-8 flex flex-col gap-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-profit/10 border border-profit/20">
-              <BarChart2 className="h-5 w-5 text-profit" />
+          <div className="bg-surface p-8 flex flex-col gap-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-elevated border border-border">
+                <BarChart2 className="h-4 w-4 text-profit" />
+              </div>
+              <h3 className="text-base font-semibold text-text-primary">Payouts with no black boxes.</h3>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">Payouts with no black boxes.</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                Every payout is calculated against a published high-water
-                mark. You see the same P&amp;L attribution we do — daily
-                strategy NAV, allocated AUM, and your exact fee accrual —
-                from a live dashboard that updates each evening.
-              </p>
-            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Every payout is calculated against a published high-water
+              mark. You see the same P&amp;L attribution we do — daily
+              strategy NAV, allocated AUM, and your exact fee accrual —
+              from a live dashboard updated each evening.
+            </p>
 
-            {/* Mock payout breakdown */}
+            {/* Sample statement — data table */}
             <div className="rounded-lg border border-border overflow-hidden">
-              <div className="px-4 py-2.5 bg-elevated border-b border-border">
-                <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
-                  Sample monthly statement
-                </span>
+              <div className="px-3 py-2 bg-elevated border-b border-border">
+                <span className="th">Sample monthly statement — May '26</span>
               </div>
               {[
-                { label: "Monthly retainer",     value: "₹65,000",  dim: false },
-                { label: "Live P&L (May '26)",    value: "+₹4.82L",  dim: false },
-                { label: "Performance share (18%)", value: "₹86,760", dim: false },
-                { label: "Total payout",          value: "₹1,51,760", dim: false, strong: true },
-              ].map(({ label, value, strong }) => (
-                <div key={label} className={cn(
-                  "flex items-center justify-between px-4 py-2.5 border-b border-border last:border-b-0 text-sm",
-                  strong ? "bg-profit/5" : ""
-                )}>
-                  <span className={strong ? "text-text-primary font-medium" : "text-text-secondary"}>
+                { label: "Monthly retainer",      value: "₹65,000",   highlight: false },
+                { label: "Live P&L",               value: "+₹4.82L",   highlight: false },
+                { label: "Performance share (18%)", value: "₹86,760",   highlight: false },
+                { label: "Total payout",           value: "₹1,51,760", highlight: true  },
+              ].map(({ label, value, highlight }) => (
+                <div
+                  key={label}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 border-b border-border last:border-b-0 text-sm",
+                    highlight && "bg-profit/[0.05]"
+                  )}
+                >
+                  <span className={highlight ? "text-text-primary font-medium" : "text-text-secondary"}>
                     {label}
                   </span>
                   <span className={cn(
                     "font-mono tabular-nums",
-                    strong ? "text-profit font-semibold" : "text-text-primary"
+                    highlight ? "text-profit font-semibold" : "text-text-primary"
                   )}>
                     {value}
                   </span>
@@ -323,6 +357,7 @@ function TrustSection() {
               ))}
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -330,49 +365,50 @@ function TrustSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Top-5 leaderboard strip
+// Live strategies leaderboard strip
 // ─────────────────────────────────────────────────────────────────────────────
 
 function LeaderboardStrip() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+
         <div className="flex items-end justify-between gap-4 mb-8">
           <div>
-            <p className="text-xs font-mono text-accent uppercase tracking-widest mb-3">Leaderboard</p>
+            <p className="label-caps-accent mb-3">Live strategies</p>
             <h2 className="text-2xl sm:text-3xl font-semibold text-text-primary tracking-tight">
-              Live strategies with 26 Miles' capital deployed.
+              26 Miles capital deployed, ranked by OOS Sharpe.
             </h2>
-            <p className="text-sm text-text-secondary mt-2 max-w-lg">
-              Ranked by out-of-sample Sharpe — the only metric that matters.
-              Backtests are shown for context, never for ranking.
+            <p className="text-sm text-text-secondary mt-2">
+              Backtests are shown for context only. They carry zero ranking weight.
             </p>
           </div>
           <Link
             href="/leaderboard"
-            className="flex-shrink-0 hidden sm:inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 transition-colors font-medium"
+            className="flex-shrink-0 hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 transition-colors"
           >
             Full leaderboard
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {/* Table */}
-        <div className="border border-border rounded-xl overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden">
+
           {/* Header */}
-          <div className="hidden sm:grid grid-cols-[2rem_1fr_7rem_6rem_6rem_6rem_7rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
+          <div className="hidden sm:grid grid-cols-[2rem_1fr_7rem_6rem_6rem_6rem_7rem] gap-x-4 px-4 py-2.5 bg-elevated border-b border-border">
             {([
-              { h: "#",           tooltip: undefined },
-              { h: "Strategy",    tooltip: undefined },
-              { h: "Asset class", tooltip: undefined },
+              { h: "#" },
+              { h: "Strategy" },
+              { h: "Asset class" },
               { h: "OOS Sharpe",  tooltip: GLOSSARY.sharpeRatio },
-              { h: "Backtest",    tooltip: GLOSSARY.inSample },
-              { h: "Max DD",      tooltip: GLOSSARY.drawdown },
+              { h: "Backtest",    tooltip: GLOSSARY.inSample    },
+              { h: "Max DD",      tooltip: GLOSSARY.drawdown    },
               { h: "State",       tooltip: GLOSSARY.lifecycleState },
             ] as { h: string; tooltip?: string }[]).map(({ h, tooltip }) => (
-              <span key={h} className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">
+              <span key={h} className="th">
                 {tooltip
-                  ? <MetricLabel label={h} tooltip={tooltip} labelClassName="text-2xs font-mono text-text-tertiary uppercase tracking-wider" />
+                  ? <MetricLabel label={h} tooltip={tooltip} labelClassName="th" />
                   : h}
               </span>
             ))}
@@ -385,13 +421,13 @@ function LeaderboardStrip() {
               <Link
                 key={s.id}
                 href={`/strategy/${s.id}`}
-                className="group block border-b border-border last:border-b-0 hover:bg-elevated/60 transition-colors"
+                className="group block border-b border-border last:border-b-0 hover:bg-elevated/70 transition-colors"
               >
-                {/* Mobile layout */}
-                <div className="sm:hidden px-4 py-4 flex flex-col gap-1">
+                {/* Mobile */}
+                <div className="sm:hidden px-4 py-3.5 flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-text-tertiary w-4">{i + 1}</span>
+                      <span className="font-mono text-2xs text-text-tertiary w-4 tabular-nums">{i + 1}</span>
                       <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">{s.name}</span>
                     </div>
                     <LifecycleBadge state={s.lifecycleState} />
@@ -399,7 +435,7 @@ function LeaderboardStrip() {
                   <div className="flex items-center gap-4 pl-6">
                     <span className="text-xs text-text-tertiary">{s.assetClass}</span>
                     <span className={cn("font-mono text-sm tabular-nums", sharpeUp ? "text-profit" : "text-text-primary")}>
-                      {s.oosSharp.toFixed(2)} Sharpe
+                      {s.oosSharp.toFixed(2)} SR
                     </span>
                     <span className="font-mono text-sm tabular-nums text-loss">
                       {s.maxDrawdownPct.toFixed(1)}%
@@ -407,27 +443,29 @@ function LeaderboardStrip() {
                   </div>
                 </div>
 
-                {/* Desktop layout */}
-                <div className="hidden sm:grid grid-cols-[2rem_1fr_7rem_6rem_6rem_6rem_7rem] gap-x-4 items-center px-5 py-3.5">
-                  <span className="font-mono text-sm text-text-tertiary tabular-nums">{i + 1}</span>
+                {/* Desktop */}
+                <div className="hidden sm:grid grid-cols-[2rem_1fr_7rem_6rem_6rem_6rem_7rem] gap-x-4 items-center px-4 py-3">
+                  <span className="font-mono text-xs text-text-tertiary tabular-nums">{i + 1}</span>
 
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors truncate">
                       {s.name}
                     </p>
-                    <p className="text-2xs text-text-tertiary mt-0.5 truncate">
+                    <p className="font-mono text-2xs text-text-tertiary mt-0.5 truncate">
                       {owner?.handle ?? "—"}
                     </p>
                   </div>
 
                   <span className="text-xs text-text-secondary truncate">{s.assetClass}</span>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {sharpeUp
-                      ? <TrendingUp className="h-3 w-3 text-profit flex-shrink-0" />
-                      : <TrendingDown className="h-3 w-3 text-loss flex-shrink-0" />
-                    }
-                    <span className={cn("font-mono text-sm tabular-nums font-medium", sharpeUp ? "text-profit" : "text-loss")}>
+                      ? <TrendingUp   className="h-3 w-3 text-profit flex-shrink-0" />
+                      : <TrendingDown className="h-3 w-3 text-loss   flex-shrink-0" />}
+                    <span className={cn(
+                      "font-mono text-sm tabular-nums font-medium",
+                      sharpeUp ? "text-profit" : "text-loss"
+                    )}>
                       {s.oosSharp.toFixed(2)}
                     </span>
                   </div>
@@ -448,16 +486,17 @@ function LeaderboardStrip() {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs text-text-tertiary font-mono">
-            OOS Sharpe computed on true out-of-sample data only · RF = 6% per annum
+          <p className="font-mono text-2xs text-text-tertiary">
+            OOS Sharpe — true out-of-sample only · RF = 6% p.a.
           </p>
           <Link
             href="/leaderboard"
-            className="sm:hidden inline-flex items-center gap-1.5 text-sm text-accent font-medium"
+            className="sm:hidden inline-flex items-center gap-1 text-sm text-accent font-medium"
           >
-            Full leaderboard <ArrowRight className="h-4 w-4" />
+            Full leaderboard <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+
       </div>
     </section>
   );
@@ -471,13 +510,15 @@ function FinalCTA() {
   return (
     <section>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <div className="relative rounded-2xl border border-accent/20 bg-surface overflow-hidden">
-          {/* Background accent wash */}
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent" />
-          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-accent/5 blur-3xl" />
+        <div className="relative rounded-lg border border-border bg-surface overflow-hidden">
 
-          <div className="relative px-8 py-14 sm:px-14 flex flex-col sm:flex-row items-center justify-between gap-8">
+          {/* Accent hairline at top edge */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+
+          <div className="px-8 py-14 sm:px-14 flex flex-col sm:flex-row items-center justify-between gap-10">
+
             <div className="text-center sm:text-left max-w-xl">
+              <p className="label-caps-accent mb-4">Start here</p>
               <h2 className="text-2xl sm:text-3xl font-semibold text-text-primary tracking-tight mb-3">
                 If you have edge, we have capital.
               </h2>
@@ -487,13 +528,9 @@ function FinalCTA() {
                 a clean backtest, and a credible hypothesis.
               </p>
 
-              <div className="flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-2 mt-5">
-                {[
-                  "Nifty &amp; Bank Nifty F&O",
-                  "NSE equities — any cap",
-                  "Multi-asset overlays",
-                ].map((item) => (
-                  <span key={item} className="flex items-center gap-1.5 text-xs text-text-tertiary font-mono">
+              <div className="flex flex-wrap justify-center sm:justify-start gap-x-5 gap-y-2 mt-5">
+                {["Nifty &amp; Bank Nifty F&O", "NSE equities — any cap", "Multi-asset overlays"].map((item) => (
+                  <span key={item} className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary">
                     <span className="h-1 w-1 rounded-full bg-accent" />
                     <span dangerouslySetInnerHTML={{ __html: item }} />
                   </span>
@@ -502,17 +539,15 @@ function FinalCTA() {
             </div>
 
             <div className="flex-shrink-0 flex flex-col items-center sm:items-end gap-3">
-              <Link
-                href="/submit"
-                className="inline-flex items-center gap-2 rounded px-6 py-3 text-sm font-semibold bg-accent hover:bg-accent/90 text-white transition-colors shadow-glow whitespace-nowrap"
-              >
+              <Link href="/submit" className="btn-primary px-6 py-3">
                 Submit a Strategy
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <p className="text-2xs text-text-tertiary font-mono text-center sm:text-right">
+              <p className="font-mono text-2xs text-text-tertiary">
                 Free to submit · IP protected · No exclusivity
               </p>
             </div>
+
           </div>
         </div>
       </div>
