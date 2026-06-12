@@ -100,7 +100,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "Close (₹)",
-      color: "#3b82f6",
+      color: "#AAFF3E",
       data: [
         { x: "Jan", v: 2614 }, { x: "Feb", v: 2748 }, { x: "Mar", v: 2832 },
         { x: "Apr", v: 2801 }, { x: "May", v: 2921 }, { x: "Jun", v: 2968 },
@@ -153,7 +153,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "OI (000s)",
-      color: "#3b82f6",
+      color: "#AAFF3E",
       data: [
         { x: "21600 CE", v: 182 }, { x: "21800 CE", v: 1422 }, { x: "22000 CE", v: 1248 },
         { x: "22200 CE", v: 892 }, { x: "22400 CE", v: 641 },  { x: "22600 CE", v: 318 },
@@ -203,7 +203,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "PAT (₹ Cr)",
-      color: "#10b981",
+      color: "#22D47A",
       data: [
         { x: "Q3'22", v: 9_926 }, { x: "Q4'22", v: 10_846 }, { x: "Q1'23", v: 11_074 },
         { x: "Q2'23", v: 11_342 }, { x: "Q3'23", v: 11_058 }, { x: "Q4'23", v: 11_392 },
@@ -254,7 +254,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "area",
       yLabel: "Price (₹)",
-      color: "#3b82f6",
+      color: "#AAFF3E",
       data: [
         { x: "09:15", v: 1604.80 }, { x: "09:30", v: 1607.20 }, { x: "09:45", v: 1611.40 },
         { x: "10:00", v: 1608.90 }, { x: "10:15", v: 1613.50 }, { x: "10:30", v: 1610.20 },
@@ -306,7 +306,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "Weight %",
-      color: "#f59e0b",
+      color: "#F5A623",
       data: [
         { x: "Jan'23", v: 9.12 }, { x: "Apr'23", v: 9.34 }, { x: "Jul'23", v: 9.48 },
         { x: "Oct'23", v: 9.67 }, { x: "Jan'24", v: 9.71 }, { x: "Apr'24", v: 9.82 },
@@ -353,7 +353,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "Div / share (₹)",
-      color: "#10b981",
+      color: "#22D47A",
       data: [
         { x: "FY19", v: 6 }, { x: "FY20", v: 6 }, { x: "FY21", v: 0 },
         { x: "FY22", v: 7 }, { x: "FY23", v: 8 }, { x: "FY24", v: 10 },
@@ -399,8 +399,8 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "bar",
       yLabel: "Net flow (₹ Cr)",
-      color: "#10b981",
-      negativeColor: "#ef4444",
+      color: "#22D47A",
+      negativeColor: "#FF4040",
       data: [
         { x: "Jan", v: 4_214 }, { x: "Feb", v: -2_841 }, { x: "Mar", v: 1_928 },
         { x: "Apr", v: -4_102 }, { x: "May", v: 3_618 }, { x: "Jun", v: 2_241 },
@@ -450,7 +450,7 @@ const DATASETS: Dataset[] = [
     chart: {
       kind: "line",
       yLabel: "% / Rate",
-      color: "#f59e0b",
+      color: "#F5A623",
       data: [
         { x: "Jun'23", v: 4.81 }, { x: "Jul'23", v: 7.44 }, { x: "Aug'23", v: 6.83 },
         { x: "Sep'23", v: 5.02 }, { x: "Oct'23", v: 4.87 }, { x: "Nov'23", v: 5.55 },
@@ -517,20 +517,23 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const chartTooltipStyle = {
-  contentStyle: { background: "#1a1d26", border: "1px solid #2a3042", borderRadius: 8, fontSize: 11 },
-  labelStyle:   { color: "#8892a4" },
-  itemStyle:    { color: "#e8eaf0" },
+  contentStyle: { background: "#1C1F26", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 4, fontSize: 10, fontFamily: "var(--font-mono)" },
+  labelStyle:   { color: "#4D5562" },
+  itemStyle:    { color: "#E6E8EB" },
 };
 
 function DataChart({ spec }: { spec: ChartSpec }) {
+  const TICK = { fill: "#4D5562", fontSize: 10, fontFamily: "var(--font-mono)" };
+  const GRID = "rgba(255,255,255,0.045)";
+
   if (spec.kind === "line") {
     return (
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={spec.data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2330" vertical={false} />
-          <XAxis dataKey="x" tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} width={48}
-            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#8892a4" } }} />
+          <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
+          <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
+          <YAxis tick={TICK} axisLine={false} tickLine={false} width={48}
+            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
           <RTooltip {...chartTooltipStyle} />
           <Line dataKey="v" stroke={spec.color} strokeWidth={1.5} dot={false} />
         </LineChart>
@@ -543,15 +546,15 @@ function DataChart({ spec }: { spec: ChartSpec }) {
         <AreaChart data={spec.data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor={spec.color} stopOpacity={0.15} />
+              <stop offset="5%"  stopColor={spec.color} stopOpacity={0.12} />
               <stop offset="95%" stopColor={spec.color} stopOpacity={0}    />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2330" vertical={false} />
-          <XAxis dataKey="x" tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} width={56}
+          <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
+          <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
+          <YAxis tick={TICK} axisLine={false} tickLine={false} width={56}
             domain={["auto", "auto"]}
-            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 14, style: { fontSize: 9, fill: "#8892a4" } }} />
+            label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 14, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
           <RTooltip {...chartTooltipStyle} />
           <Area dataKey="v" stroke={spec.color} strokeWidth={1.5} fill="url(#areaGrad)" dot={false} />
         </AreaChart>
@@ -562,10 +565,10 @@ function DataChart({ spec }: { spec: ChartSpec }) {
   return (
     <ResponsiveContainer width="100%" height={160}>
       <BarChart data={spec.data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e2330" vertical={false} />
-        <XAxis dataKey="x" tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 10, fill: "#8892a4" }} axisLine={false} tickLine={false} width={48}
-          label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#8892a4" } }} />
+        <CartesianGrid strokeDasharray="0" stroke={GRID} vertical={false} />
+        <XAxis dataKey="x" tick={TICK} axisLine={false} tickLine={false} />
+        <YAxis tick={TICK} axisLine={false} tickLine={false} width={48}
+          label={{ value: spec.yLabel, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 9, fill: "#4D5562", fontFamily: "var(--font-mono)" } }} />
         <RTooltip {...chartTooltipStyle} />
         <Bar dataKey="v" radius={[2, 2, 0, 0]}>
           {spec.data.map((d, i) => (
@@ -774,14 +777,14 @@ function DatasetDetail({
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={onSandbox}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
         </button>
         <Link
           href="/submit"
-          className="inline-flex items-center gap-2 rounded-lg border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary px-4 py-2.5 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-2 rounded border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary px-4 py-2.5 text-sm font-medium transition-colors"
         >
           Use in a Strategy
           <ArrowRight className="h-4 w-4" />
@@ -845,7 +848,7 @@ export default function DataPage() {
         </div>
         <button
           onClick={openSandbox}
-          className="flex-shrink-0 inline-flex items-center gap-2 rounded-lg bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors shadow-sm"
+          className="flex-shrink-0 inline-flex items-center gap-2 rounded bg-accent hover:bg-accent/90 text-canvas px-4 py-2.5 text-sm font-semibold transition-colors"
         >
           <FlaskConical className="h-4 w-4" />
           Open in Sandbox
@@ -881,7 +884,7 @@ export default function DataPage() {
                 placeholder="Search datasets…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-elevated border border-border rounded-lg pl-8 pr-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-accent/60 focus:border-accent/60 transition-colors"
+                className="w-full bg-elevated border border-border rounded pl-8 pr-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-accent/60 focus:border-accent/60 transition-colors"
               />
             </div>
 

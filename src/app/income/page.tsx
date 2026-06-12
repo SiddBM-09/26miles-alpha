@@ -120,8 +120,8 @@ function NavDot(props: any) {
       cx={cx}
       cy={cy}
       r={4}
-      fill={below ? "#ef4444" : "#10b981"}
-      stroke="#0a0b0d"
+      fill={below ? "#FF4040" : "#22D47A"}
+      stroke="#0A0B0D"
       strokeWidth={1.5}
     />
   );
@@ -131,28 +131,28 @@ function HWMChart() {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={HWM_CHART} margin={{ top: 12, right: 8, left: -24, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1f2430" vertical={false} />
+        <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.045)" vertical={false} />
         <XAxis
           dataKey="month"
-          tick={{ fontSize: 10, fill: "#555d70", fontFamily: "monospace" }}
+          tick={{ fontSize: 10, fill: "#4D5562", fontFamily: "var(--font-mono)" }}
           tickLine={false}
-          axisLine={{ stroke: "#1f2430" }}
+          axisLine={false}
         />
         <YAxis
           domain={[98.5, 106.5]}
           tickCount={5}
-          tick={{ fontSize: 10, fill: "#555d70", fontFamily: "monospace" }}
+          tick={{ fontSize: 10, fill: "#4D5562", fontFamily: "var(--font-mono)" }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => v.toFixed(0)}
         />
-        <ChartTooltip content={<HWMTooltip />} cursor={{ stroke: "#1f2430", strokeWidth: 1 }} />
+        <ChartTooltip content={<HWMTooltip />} cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }} />
 
-        {/* HWM — step function, amber dashed */}
+        {/* HWM — step function, warn dashed */}
         <Line
           type="stepAfter"
           dataKey="hwm"
-          stroke="#f59e0b"
+          stroke="#F5A623"
           strokeWidth={1.5}
           strokeDasharray="5 3"
           dot={false}
@@ -164,10 +164,10 @@ function HWMChart() {
         <Line
           type="monotone"
           dataKey="nav"
-          stroke="#10b981"
-          strokeWidth={2}
+          stroke="#22D47A"
+          strokeWidth={1.5}
           dot={<NavDot />}
-          activeDot={{ r: 5, fill: "#10b981", stroke: "#0a0b0d", strokeWidth: 1.5 }}
+          activeDot={{ r: 4, fill: "#22D47A", stroke: "#0A0B0D", strokeWidth: 1.5 }}
           name="NAV"
         />
       </LineChart>
@@ -373,7 +373,7 @@ export default function IncomePage() {
                 <span className="text-text-secondary">NAV (below HWM)</span>
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-0.5 w-6 bg-warn inline-block" style={{ borderTop: "2px dashed #f59e0b", height: 0 }} />
+                <span className="h-0.5 w-6 bg-warn inline-block" style={{ borderTop: "2px dashed #F5A623", height: 0 }} />
                 <span className="text-text-secondary">HWM</span>
               </span>
             </div>
@@ -557,6 +557,7 @@ export default function IncomePage() {
         </div>
 
         <div className="border border-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
           {/* Header */}
           <div className="grid grid-cols-[6rem_1fr_6rem_8rem] sm:grid-cols-[8rem_1fr_8rem_10rem] gap-x-4 px-5 py-2.5 bg-elevated border-b border-border">
             {([
@@ -577,7 +578,7 @@ export default function IncomePage() {
             <div
               key={row.level}
               className={cn(
-                "grid grid-cols-[6rem_1fr_6rem_8rem] sm:grid-cols-[8rem_1fr_8rem_10rem] gap-x-4 items-center px-5 py-3.5",
+                "grid grid-cols-[6rem_1fr_6rem_8rem] sm:grid-cols-[8rem_1fr_8rem_10rem] gap-x-4 items-center px-5 py-2.5",
                 "border-b border-border last:border-b-0",
                 i % 2 === 0 ? "bg-surface" : "bg-elevated/30",
               )}
@@ -588,6 +589,7 @@ export default function IncomePage() {
               <span className="font-mono text-sm tabular-nums text-text-primary">{row.bonus}</span>
             </div>
           ))}
+          </div>
         </div>
 
         <p className="text-2xs text-text-tertiary font-mono">

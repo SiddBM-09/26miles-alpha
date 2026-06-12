@@ -139,20 +139,20 @@ function Sparkline({ values, className }: { values: number[]; className?: string
       className={className}
       aria-hidden
     >
-      <path d={fill} fill={trend ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)"} />
+      <path d={fill} fill={trend ? "rgba(34,212,122,0.08)" : "rgba(255,64,64,0.08)"} />
       <path
         d={line}
         fill="none"
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
-        stroke={trend ? "#10b981" : "#ef4444"}
+        stroke={trend ? "#22D47A" : "#FF4040"}
       />
       <circle
         cx={parseFloat(last[0])}
         cy={parseFloat(last[1])}
         r="2"
-        fill={trend ? "#10b981" : "#ef4444"}
+        fill={trend ? "#22D47A" : "#FF4040"}
       />
     </svg>
   );
@@ -341,7 +341,7 @@ export default function LeaderboardPage() {
       <div className="border border-border rounded-lg overflow-hidden">
 
         {/* Desktop header */}
-        <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-3 bg-elevated border-b border-border">
+        <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-2.5 bg-elevated border-b border-border">
           <span className="text-2xs font-mono text-text-tertiary uppercase tracking-wider">#</span>
 
           <SortButton col="alphaScore" label="Researcher" current={sortKey} dir={sortDir} onSort={handleSort} />
@@ -373,7 +373,7 @@ export default function LeaderboardPage() {
           return (
             <RowWrapper key={row.id} isOwn={isOwn}>
               {/* ── Mobile layout ── */}
-              <div className="md:hidden px-4 py-4">
+              <div className="md:hidden px-4 py-3">
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className={cn(
@@ -414,7 +414,7 @@ export default function LeaderboardPage() {
               </div>
 
               {/* ── Desktop layout ── */}
-              <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-3.5">
+              <div className="hidden md:grid md:grid-cols-[2.5rem_1fr_6rem_11rem_5rem_5rem_7rem] gap-x-4 items-center px-5 py-2.5">
 
                 {/* Rank */}
                 <span className={cn(

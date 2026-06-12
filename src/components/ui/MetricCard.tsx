@@ -6,15 +6,12 @@ export type MetricTrend = "up" | "down" | "neutral";
 
 interface MetricCardProps {
   label: string;
-  /** Hover tooltip definition shown via MetricLabel ⓘ icon */
   tooltip?: string;
   value: string | number;
   unit?: string;
   subValue?: string;
   trend?: MetricTrend;
-  /** Small annotation below the value, e.g. "out-of-sample" */
   annotation?: string;
-  /** If true, render a skeleton shimmer instead of content */
   loading?: boolean;
   className?: string;
 }
@@ -31,6 +28,8 @@ const TREND_COLOR: Record<MetricTrend, string> = {
   neutral: "text-text-tertiary",
 };
 
+const LABEL_CLS = "text-2xs font-mono text-text-tertiary uppercase tracking-[0.10em]";
+
 export function MetricCard({
   label,
   tooltip,
@@ -45,7 +44,7 @@ export function MetricCard({
   if (loading) {
     return (
       <div className={cn("card p-4 flex flex-col gap-2", className)}>
-        <div className="h-2.5 w-20 rounded-sm bg-elevated animate-shimmer" />
+        <div className="h-2 w-20 rounded-sm bg-elevated animate-shimmer" />
         <div className="h-6 w-14 rounded-sm bg-elevated animate-shimmer" />
         <div className="h-2 w-16 rounded-sm bg-elevated animate-shimmer" />
       </div>
@@ -68,25 +67,23 @@ export function MetricCard({
           <MetricLabel
             label={label}
             tooltip={tooltip}
-            labelClassName="text-xs text-text-secondary uppercase tracking-wider font-medium"
+            labelClassName={LABEL_CLS}
           />
         ) : (
-          <span className="text-xs text-text-secondary uppercase tracking-wider font-medium">
-            {label}
-          </span>
+          <span className={LABEL_CLS}>{label}</span>
         )}
         {TrendIcon && (
-          <TrendIcon className={cn("h-3.5 w-3.5", trendColor)} strokeWidth={2} />
+          <TrendIcon className={cn("h-3 w-3 flex-shrink-0", trendColor)} strokeWidth={2} />
         )}
       </div>
 
       {/* Value */}
-      <div className="flex items-baseline gap-1.5 mt-0.5">
-        <span className="font-mono text-2xl font-semibold text-text-primary tabular-nums">
+      <div className="flex items-baseline gap-1.5 mt-1">
+        <span className="font-mono text-2xl font-semibold text-text-primary tabular-nums leading-none">
           {typeof value === "number" ? value.toFixed(2) : value}
         </span>
         {unit && (
-          <span className="text-xs text-text-secondary font-mono">{unit}</span>
+          <span className="text-xs text-text-tertiary font-mono">{unit}</span>
         )}
       </div>
 
@@ -99,7 +96,7 @@ export function MetricCard({
 
       {/* Annotation */}
       {annotation && (
-        <span className="text-2xs text-text-tertiary mt-0.5">{annotation}</span>
+        <span className="text-2xs text-text-tertiary font-mono mt-0.5">{annotation}</span>
       )}
     </div>
   );
